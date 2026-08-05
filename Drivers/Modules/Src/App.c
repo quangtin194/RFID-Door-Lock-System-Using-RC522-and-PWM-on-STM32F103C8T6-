@@ -66,6 +66,7 @@ void App_Run(void) {
                 break;
             case ACCESS_DENIED:
                 Oled_Display("Denied");
+                Buzzer_on();
                 UART_PC_Print("Denied ID: ...\n");
                 
                 break;
