@@ -31,7 +31,7 @@ void App_Init(
 
     // Trang thai ban dau    
     appState = IDLE;
-    previous_State = IDLE;
+    previous_State = ERROR_STATE;
 }
 
 void App_Run(void) {
