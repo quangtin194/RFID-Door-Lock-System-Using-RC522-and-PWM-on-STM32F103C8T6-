@@ -9,7 +9,18 @@ static RC522_Status_t rc522Status;
 static UID_Status_t uidStatus;
 
 // XU LY NGAT EXTI
-// ....
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+    if (appState ==ADMIN_MODE){
+        if (GPIO_Pin== Button_Handle.Add_Button){
+            appState=ADD_CARD;
+            Timeout_counter=HAL_GetTick(); 
+        }else if (GPIO_Pin ==Button_Handle.Del_Button){
+            appState=DELETE_CARD;
+            Timeout_counter=HAL_GetTick();
+        }
+    }
+}
+// ..}..
 
 // FUNCTION DEFINITIONS
 void App_Init(
