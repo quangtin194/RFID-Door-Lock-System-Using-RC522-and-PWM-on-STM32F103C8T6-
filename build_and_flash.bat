@@ -47,7 +47,7 @@ echo STEP 4: FLASHING FIRMWARE TO TARGET MCU
 echo ===============================================
 
 REM Flash firmware to STM32 and reset MCU
-STM32_Programmer_CLI -c port=SWD sn=E1007200D0D2139393740544 -w build/PRJ.elf 0x08000000 -v -rst
+STM32_Programmer_CLI -c port=SWD  -w build/PRJ.elf 0x08000000 -v -rst
 
 if %ERRORLEVEL% neq 0 (
     echo.
