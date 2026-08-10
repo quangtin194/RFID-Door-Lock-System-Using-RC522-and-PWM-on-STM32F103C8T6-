@@ -18,10 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "Oled.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "App.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define BTN_DEBOUNCE_MS   50
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -62,7 +62,25 @@ static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void Test_Button_Init(void);
+static void Test_OledCycle_Poll(void);
+static uint8_t       oledTestIndex     = 0;
+static GPIO_PinState  btnLastState      = GPIO_PIN_SET;   /* pull-up: nghỉ = HIGH */
+static uint32_t       btnLastDebounceTs = 0;
+static const Oled_Msg_t oledTestSequence[12] = {
+    OLED_MSG_SCANNING,          /* IDLE            */
+    OLED_MSG_WELCOME,           /* ACCESS_ALLOWED  */
+    OLED_MSG_DENIED,            /* ACCESS_DENIED   */
+    OLED_MSG_ADMIN_MENU,        /* ADMIN_MODE      */
+    OLED_MSG_SCAN_ADD_CARD,     /* ADD_CARD        */
+    OLED_MSG_CARD_EXISTS,       /* CARD_EXISTS     */
+    OLED_MSG_CARD_ADDED,        /* CARD_ADDED      */
+    OLED_MSG_SCAN_DELETE_CARD,  /* DELETE_CARD     */
+    OLED_MSG_CARD_DELETED,      /* CARD_DELETED    */
+    OLED_MSG_NOT_FOUND,         /* DELETE_DENIED (UID_NEW)   */
+    OLED_MSG_ADMIN_CARD,        /* DELETE_DENIED (UID_ADMIN) */
+    OLED_MSG_ERROR              /* ERROR_STATE     */
+};
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -105,16 +123,17 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-
+Test_Button_Init();
+Oled_Init(&hi2c1);
+Oled_ShowStatus(oledTestSequence[oledTestIndex]);   /* hiện state đầu tiên: Scanning! */
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    
     /* USER CODE END WHILE */
-
+Test_OledCycle_Poll();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -132,12 +151,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -174,7 +194,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -381,6 +401,7 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -423,7 +444,41 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void Test_Button_Init(void)
+{
+    __HAL_RCC_GPIOC_CLK_ENABLE();   /* GPIOC chưa được bật ở MX_GPIO_Init gốc */
 
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin  = GPIO_PIN_15;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;   /* 1 chân nút -> PC15, chân kia -> GND */
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+}
+
+/* Polling debounce, không cần EXTI/interrupt.
+ * Mỗi lần phát hiện cạnh xuống (nhấn) ổn định > BTN_DEBOUNCE_MS,
+ * chuyển sang state kế tiếp trong danh sách 12 state. */
+static void Test_OledCycle_Poll(void)
+{
+    static GPIO_PinState stableState = GPIO_PIN_SET;
+    GPIO_PinState reading = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_15);
+
+    if (reading != btnLastState) {
+        btnLastDebounceTs = HAL_GetTick();
+    }
+
+    if ((HAL_GetTick() - btnLastDebounceTs) > BTN_DEBOUNCE_MS) {
+        if (reading != stableState) {
+            stableState = reading;
+            if (stableState == GPIO_PIN_RESET) {   /* nhấn = kéo xuống GND */
+                oledTestIndex = (oledTestIndex + 1) % 12;
+                Oled_ShowStatus(oledTestSequence[oledTestIndex]);
+            }
+        }
+    }
+
+    btnLastState = reading;
+}
 /* USER CODE END 4 */
 
 /**
