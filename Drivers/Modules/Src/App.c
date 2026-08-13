@@ -31,8 +31,7 @@ void App_Init(
 
     // Trang thai ban dau    
     appState = IDLE;
-    previous_State = IDLE;
-    
+    previous_State = ERROR_STATE;
 }
 
 void App_Run(void) {
@@ -66,6 +65,7 @@ void App_Run(void) {
                 break;
             case ACCESS_DENIED:
                 Oled_ShowStatus(OLED_MSG_DENIED);
+                Buzzer_on();
                 UART_PC_Print("Denied ID: ...\n");
                 
                 break;
@@ -140,11 +140,12 @@ void App_Run(void) {
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
             else
             {
-                uidStatus = RC522_UID_CheckAorD();
-                if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN) appState = CARD_EXISTS;
-                else appState = CARD_ADDED;
-                Timeout_counter = HAL_GetTick();
-
+                if (RC522_UID_Detected() == RC522_OK){
+                    uidStatus = RC522_UID_CheckAorD();
+                    if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN) appState = CARD_EXISTS;
+                    else appState = CARD_ADDED;
+                    Timeout_counter = HAL_GetTick();
+                }
             }
 
             break;
@@ -152,10 +153,12 @@ void App_Run(void) {
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
             else
             {
-                uidStatus = RC522_UID_CheckAorD();
-                if (uidStatus == UID_EXIST) appState = CARD_DELETED;
-                else appState = DELETE_DENIED;
-                Timeout_counter = HAL_GetTick();
+                if (RC522_UID_Detected() == RC522_OK){
+                    uidStatus = RC522_UID_CheckAorD();
+                    if (uidStatus == UID_EXIST) appState = CARD_DELETED;
+                    else appState = DELETE_DENIED;
+                    Timeout_counter = HAL_GetTick();
+                }
             }
 
             break;
