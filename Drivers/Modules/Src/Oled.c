@@ -14,13 +14,13 @@ static I2C_HandleTypeDef *Oled_Handle;
 static uint8_t Oled_Buffer[OLED_WIDTH * OLED_PAGES]; // nhân bản dữ liệu gửi qua OLED 
 static void Oled_WriteCommand(uint8_t cmd)
 {
-    HAL_I2C_Mem_Write_DMA(Oled_Handle, OLED_I2C_ADDR, OLED_CMD_MODE,
-                       I2C_MEMADD_SIZE_8BIT, &cmd, 1);
+    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_CMD_MODE,
+                       I2C_MEMADD_SIZE_8BIT, &cmd, 1,HAL_MAX_DELAY);
 } //lệnh điều chỉnh cưởng độ sáng .....
 static void Oled_WriteData(const uint8_t *data, uint16_t size)
 {
-    HAL_I2C_Mem_Write_DMA(Oled_Handle, OLED_I2C_ADDR, OLED_DATA_MODE,
-                       I2C_MEMADD_SIZE_8BIT, (uint8_t *)data, size);
+    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_DATA_MODE,
+                       I2C_MEMADD_SIZE_8BIT, (uint8_t *)data, size,HAL_MAX_DELAY);
 } //lệnh bật tắt pixel, ghi thẳng vào RAM
 static void Oled_UpdateScreen(void)
 {

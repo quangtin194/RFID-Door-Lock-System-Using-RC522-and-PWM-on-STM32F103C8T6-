@@ -2,11 +2,11 @@
 #include "Button.h"
 
 // VARIABLE DEFINITIONS
-static Button_t Button_Handle;
+ Button_t Button_Handle;
 
 // FUNCTION DEFINITIONS
-void Button_Init(Button_t button) {
-    Button_Handle = button;
+void Button_Init(Button_t *button) {
+    Button_Handle = *button;
     Button_DisableEXTI();
 }
 

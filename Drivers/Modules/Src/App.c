@@ -24,7 +24,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 // FUNCTION DEFINITIONS
 void App_Init(
-    Button_t button,
+    Button_t *button,
     Buzzer_t *buzzer,
     UART_HandleTypeDef *uart,
     I2C_HandleTypeDef *oled,
@@ -99,7 +99,7 @@ void App_Run(void) {
                 break;
             case CARD_DELETED:
                 Oled_ShowStatus(OLED_MSG_CARD_DELETED);
-                UART_PC_Print("Delete ID: ...\n");
+                UART_PC_Print("Delete ID: ..`.\n");
                 break;
             case DELETE_DENIED:
                 if (uidStatus == UID_NEW) Oled_ShowStatus(OLED_MSG_NOT_FOUND);

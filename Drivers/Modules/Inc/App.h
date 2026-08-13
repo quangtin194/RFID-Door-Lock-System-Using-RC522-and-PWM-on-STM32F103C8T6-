@@ -36,7 +36,7 @@ typedef enum {
 
 // FUNCTION PROTOTYPES
 void App_Init(
-    Button_t button,
+    Button_t *button,
     Buzzer_t *buzzer,
     UART_HandleTypeDef *uart,
     I2C_HandleTypeDef *oled,
