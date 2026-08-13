@@ -41,6 +41,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 
 SPI_HandleTypeDef hspi1;
 
@@ -50,9 +51,9 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-  Servo_t servo = {&htim2, TIM_CHANNEL_1};
-  Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
-  Button_t button = {GPIO_PIN_1, GPIO_PIN_2, EXTI1_IRQn, EXTI2_IRQn};
+Servo_t servo = {&htim2, TIM_CHANNEL_1};
+Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
+Button_t button = {GPIO_PIN_1, GPIO_PIN_2, EXTI1_IRQn, EXTI2_IRQn};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,6 +64,7 @@ static void MX_SPI1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -106,37 +108,18 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_TIM1_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   App_Init(&button ,&buzzer, &huart1, &hi2c1, &hspi1, &servo);
 
-  // uint16_t angle;
-  // uint16_t ccr;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    //App_Run();
-char msg[32];
+    App_Run();
 
-for (uint8_t addr = 1; addr < 127; addr++)
-{
-    if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 100) == HAL_OK)
-    {
-        int len = sprintf(msg, "I2C device: 0x%02X\r\n", addr);
-        HAL_UART_Transmit(&huart1, (uint8_t *)msg, len, 100);
-    }
-    else HAL_UART_Transmit(&huart1, (uint8_t *)"No", 2, 100);
-}
-    //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
-    //   angle = 90;
-    //   ccr = 1000 + ((1000 * angle) / 180);
-    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
-    // HAL_Delay(1000);
-    // angle = 0;
-    // ccr = 1000 + ((1000 * angle) / 180);
-    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -199,7 +182,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -214,6 +197,40 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
 
 }
 

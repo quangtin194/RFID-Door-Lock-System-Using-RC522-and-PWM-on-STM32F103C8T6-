@@ -11,11 +11,23 @@ void Button_Init(Button_t *button) {
 }
 
 void Button_EnableEXTI(void) {
-    HAL_NVIC_EnableIRQ(Button_Handle.Add_Button);
-    HAL_NVIC_EnableIRQ(Button_Handle.Del_Button);
+    __HAL_GPIO_EXTI_CLEAR_IT(Button_Handle.Add_but);
+    __HAL_GPIO_EXTI_CLEAR_IT(Button_Handle.Del_but);
+
+    HAL_NVIC_ClearPendingIRQ(Button_Handle.Add_Button_IRQ);
+    HAL_NVIC_ClearPendingIRQ(Button_Handle.Del_Button_IRQ);
+
+    HAL_NVIC_EnableIRQ(Button_Handle.Add_Button_IRQ);
+    HAL_NVIC_EnableIRQ(Button_Handle.Del_Button_IRQ);
 }
 
 void Button_DisableEXTI(void) {
-    HAL_NVIC_DisableIRQ(Button_Handle.Add_Button);
-    HAL_NVIC_DisableIRQ(Button_Handle.Del_Button);
+    HAL_NVIC_DisableIRQ(Button_Handle.Add_Button_IRQ);
+    HAL_NVIC_DisableIRQ(Button_Handle.Del_Button_IRQ);
+
+    __HAL_GPIO_EXTI_CLEAR_IT(Button_Handle.Add_but);
+    __HAL_GPIO_EXTI_CLEAR_IT(Button_Handle.Del_but);
+
+    HAL_NVIC_ClearPendingIRQ(Button_Handle.Add_Button_IRQ);
+    HAL_NVIC_ClearPendingIRQ(Button_Handle.Del_Button_IRQ);
 }
