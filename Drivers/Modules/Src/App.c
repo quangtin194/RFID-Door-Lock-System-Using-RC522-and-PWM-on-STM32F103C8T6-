@@ -55,7 +55,7 @@ void App_Run(void) {
                 Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_off();
-                Oled_Display("Scanning!");
+                Oled_ShowStatus(OLED_MSG_SCANNING);
 
                 break;
             case VERIFY_UID:
@@ -64,57 +64,53 @@ void App_Run(void) {
             case ADMIN_MODE:
                 Button_EnableEXTI();
                 Servo_SetAngle(OPEN_ANGLE);
-                Oled_Display("Hi Boss!");
-                Oled_Display("ADD CARD (1) or DELETE CARD (2)");
+                Oled_ShowStatus(OLED_MSG_ADMIN_MENU);
                 UART_PC_Print("Admin mode\n");
 
                 break;
             case ACCESS_ALLOWED:
                 Servo_SetAngle(OPEN_ANGLE);
-                Oled_Display("Welcome");
+                Oled_ShowStatus(OLED_MSG_WELCOME);
                 UART_PC_Print("Welcome ID: ...\n");
 
                 break;
             case ACCESS_DENIED:
-                Oled_Display("Denied");
+                Oled_ShowStatus(OLED_MSG_DENIED);
                 Buzzer_on();
                 UART_PC_Print("Denied ID: ...\n");
                 
                 break;
             case ADD_CARD:
-                Oled_Display("Scan to add");
+                Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
 
                 break;
             case DELETE_CARD:
-                Oled_Display("Scan to delete");
+                Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
 
                 break;
             case CARD_ADDED:
-                Oled_Display("Card Added");
+                Oled_ShowStatus(OLED_MSG_CARD_ADDED);
                 UART_PC_Print("Save ID: ...\n");
 
                 break;
             case CARD_EXISTS:
-                Oled_Display("Card Exists");
+                Oled_ShowStatus(OLED_MSG_CARD_EXISTS);
 
                 break;
             case CARD_DELETED:
-                Oled_Display("Card Deleted");
+                Oled_ShowStatus(OLED_MSG_CARD_DELETED);
                 UART_PC_Print("Delete ID: ...\n");
-
                 break;
             case DELETE_DENIED:
-                if (uidStatus == UID_NEW) Oled_Display("Not Found");
-                else if (uidStatus == UID_ADMIN) Oled_Display("Cannot Delete Admin");
-
+                if (uidStatus == UID_NEW) Oled_ShowStatus(OLED_MSG_NOT_FOUND);
+                else if (uidStatus == UID_ADMIN) Oled_ShowStatus(OLED_MSG_ADMIN_CARD);
                 break;
             case ERROR_STATE:
                 Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
                 UART_PC_Print("ERROR\n");
-                Oled_Display("Error!!");
-                
+                Oled_ShowStatus(OLED_MSG_ERROR);
                 break;
             default:
                 break;
