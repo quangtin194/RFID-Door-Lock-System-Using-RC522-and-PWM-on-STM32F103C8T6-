@@ -32,6 +32,7 @@ typedef enum {
     OLED_MSG_ERROR
 } Oled_Msg_t;
 
+
 void Oled_Init(I2C_HandleTypeDef *hi2c);
 
 void Oled_Clear(void);
