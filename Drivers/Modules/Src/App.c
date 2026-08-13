@@ -1,13 +1,12 @@
 // INCLUDE & DEFINE
 #include "App.h"
-
 // VARIABLE DEFINITIONS
 static volatile AppState_t appState;
 static volatile AppState_t previous_State;
 static uint32_t Timeout_counter;
 static RC522_Status_t rc522Status;
 static UID_Status_t uidStatus;
-
+extern uint8_t CurrentUID[5];
 // XU LY NGAT EXTI
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     if (appState ==ADMIN_MODE){
@@ -20,7 +19,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
         }
     }
 }
-// ..}..
+// ....
 
 // FUNCTION DEFINITIONS
 void App_Init(
@@ -47,6 +46,7 @@ void App_Init(
 
 void App_Run(void) {
 // State Entry
+    char logStr[120];
     if (appState != previous_State)
     {
         previous_State = appState;
@@ -55,7 +55,7 @@ void App_Run(void) {
                 Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_off();
-                Oled_Display("Scanning!");
+                Oled_ShowStatus(OLED_MSG_SCANNING);
 
                 break;
             case VERIFY_UID:
@@ -64,57 +64,63 @@ void App_Run(void) {
             case ADMIN_MODE:
                 Button_EnableEXTI();
                 Servo_SetAngle(OPEN_ANGLE);
-                Oled_Display("Hi Boss!");
-                Oled_Display("ADD CARD (1) or DELETE CARD (2)");
+                Oled_ShowStatus(OLED_MSG_ADMIN_MENU);
                 UART_PC_Print("Admin mode\n");
 
                 break;
             case ACCESS_ALLOWED:
+                uint8_t status = TM_MFRC522_Anticoll(CurrentUID);
                 Servo_SetAngle(OPEN_ANGLE);
-                Oled_Display("Welcome");
-                UART_PC_Print("Welcome ID: ...\n");
-
+                Oled_ShowStatus(OLED_MSG_WELCOME);
+                UART_PC_Print("Welcome ID: \n");
+                sprintf(logStr, "\r\n%02X %02X %02X %02X\r\n", 
+                  CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
+                HAL_UART_Transmit(&huart1, (uint8_t*)logStr, strlen(logStr), 100);
                 break;
             case ACCESS_DENIED:
-                Oled_Display("Denied");
+                Oled_ShowStatus(OLED_MSG_DENIED);
                 Buzzer_on();
                 UART_PC_Print("Denied ID: ...\n");
                 
                 break;
             case ADD_CARD:
-                Oled_Display("Scan to add");
+                Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
 
                 break;
             case DELETE_CARD:
-                Oled_Display("Scan to delete");
+                Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
 
                 break;
             case CARD_ADDED:
-                Oled_Display("Card Added");
+                uint8_t status = TM_MFRC522_Anticoll(CurrentUID);
+                Oled_ShowStatus(OLED_MSG_CARD_ADDED);
                 UART_PC_Print("Save ID: ...\n");
-
+                sprintf(logStr, "\r\n%02X %02X %02X %02X\r\n", 
+                  CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
+                HAL_UART_Transmit(&huart1, (uint8_t*)logStr, strlen(logStr), 100);
                 break;
             case CARD_EXISTS:
-                Oled_Display("Card Exists");
+                Oled_ShowStatus(OLED_MSG_CARD_EXISTS);
 
                 break;
             case CARD_DELETED:
-                Oled_Display("Card Deleted");
-                UART_PC_Print("Delete ID: ...\n");
-
+                uint8_t status = TM_MFRC522_Anticoll(CurrentUID);
+                Oled_ShowStatus(OLED_MSG_CARD_DELETED);
+                UART_PC_Print("Delete ID: \n");
+                sprintf(logStr, "\r\n%02X %02X %02X %02X\r\n", 
+                  CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
+                HAL_UART_Transmit(&huart1, (uint8_t*)logStr, strlen(logStr), 100);
                 break;
             case DELETE_DENIED:
-                if (uidStatus == UID_NEW) Oled_Display("Not Found");
-                else if (uidStatus == UID_ADMIN) Oled_Display("Cannot Delete Admin");
-
+                if (uidStatus == UID_NEW) Oled_ShowStatus(OLED_MSG_NOT_FOUND);
+                else if (uidStatus == UID_ADMIN) Oled_ShowStatus(OLED_MSG_ADMIN_CARD);
                 break;
             case ERROR_STATE:
                 Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
                 UART_PC_Print("ERROR\n");
-                Oled_Display("Error!!");
-                
+                Oled_ShowStatus(OLED_MSG_ERROR);
                 break;
             default:
                 break;
