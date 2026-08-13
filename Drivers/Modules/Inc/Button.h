@@ -7,8 +7,11 @@
 
 // STRUCT DEFINITIONS
 typedef struct {
-        IRQn_Type Add_Button;
-        IRQn_Type Del_Button;
+        uint16_t Add_but;
+        uint16_t Del_but;
+        IRQn_Type Add_Button_IRQ;
+        IRQn_Type Del_Button_IRQ;
+
     } Button_t;
 
 
