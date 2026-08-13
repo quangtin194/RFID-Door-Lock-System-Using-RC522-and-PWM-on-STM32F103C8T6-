@@ -1,0 +1,6 @@
+D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c:11:6:RC522_Init	16	static
+D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c:19:13:RC522_UID_AddCard	16	static
+D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c:28:13:RC522_UID_DeleteCard	16	static
+D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c:36:16:RC522_UID_Detected	16	static
+D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c:50:14:RC522_UID_Verify	16	static
+D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c:64:14:RC522_UID_CheckAorD	16	static
