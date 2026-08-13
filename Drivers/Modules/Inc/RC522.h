@@ -30,6 +30,7 @@ typedef enum
 void RC522_Init(SPI_HandleTypeDef *spi);
 RC522_Status_t RC522_UID_Detected(void);
 UID_Status_t RC522_UID_Verify(void);   // Hàm này sẽ trả về UID_ADMIN, UID_VALID hoặc UID_INVALID dựa trên UID được đọc từ thẻ RFID.
-UID_Status_t RC522_UID_CheckAorD(void); // Hàm này trả về UID_NEW, UID_ADMIN hoặc UID_EXIST
+UID_Status_t RC522_UID_Delete(void); // Hàm này trả về UID_NEW, UID_ADMIN hoặc UID_EXIST
+UID_Status_t RC522_UID_Add(void); // Hàm này trả về UID_NEW, UID_ADMIN hoặc UID_EXIST
 #endif
 
