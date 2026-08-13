@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "Servo.h"
+#include "App.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +50,9 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
+  Servo_t servo = {&htim2, TIM_CHANNEL_1};
+  Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
+  Button_t button = {GPIO_PIN_1, GPIO_PIN_2, EXTI1_IRQn, EXTI2_IRQn};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,32 +107,28 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  Servo_t servo = {&htim2, TIM_CHANNEL_1};
-  Servo_Init(&servo);
+  App_Init(&button ,&buzzer, &huart1, &hi2c1, &hspi1, &servo);
+
+  // uint16_t angle;
+  // uint16_t ccr;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-<<<<<<< Updated upstream
-    Servo_SetAngle(90);
-    HAL_Delay(3000);
-    Servo_SetAngle(0);
-    HAL_Delay(3000);
-=======
-    App_Run();
-// char msg[32];
+    //App_Run();
+char msg[32];
 
-// for (uint8_t addr = 1; addr < 127; addr++)
-// {
-//     if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 100) == HAL_OK)
-//     {
-//         int len = sprintf(msg, "I2C device: 0x%02X\r\n", addr);
-//         HAL_UART_Transmit(&huart1, (uint8_t *)msg, len, 100);
-//     }
-//     else HAL_UART_Transmit(&huart1, (uint8_t *)"No", 2, 100);
-// }
+for (uint8_t addr = 1; addr < 127; addr++)
+{
+    if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 100) == HAL_OK)
+    {
+        int len = sprintf(msg, "I2C device: 0x%02X\r\n", addr);
+        HAL_UART_Transmit(&huart1, (uint8_t *)msg, len, 100);
+    }
+    else HAL_UART_Transmit(&huart1, (uint8_t *)"No", 2, 100);
+}
     //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
     //   angle = 90;
     //   ccr = 1000 + ((1000 * angle) / 180);
@@ -139,7 +137,6 @@ int main(void)
     // angle = 0;
     // ccr = 1000 + ((1000 * angle) / 180);
     // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
->>>>>>> Stashed changes
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -159,12 +156,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -201,7 +199,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -408,6 +406,7 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -420,7 +419,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : PA1 PA2 */
   GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA3 */
