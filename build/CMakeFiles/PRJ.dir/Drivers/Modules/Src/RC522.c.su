@@ -1,4 +1,0 @@
-C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:8:6:RC522_Init	16	static
-C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:12:16:RC522_UID_Detected	4	static
-C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:17:14:RC522_UID_Verify	4	static
-C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:22:14:RC522_UID_CheckAorD	4	static

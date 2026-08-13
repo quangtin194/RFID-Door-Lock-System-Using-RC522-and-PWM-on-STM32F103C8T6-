@@ -16,8 +16,6 @@
 
 // FUNCTION PROTOTYPES
 void Oled_Init(I2C_HandleTypeDef *i2c);
-void Oled_Display(const char* message);
-
 
 typedef enum {
     OLED_MSG_SCANNING = 0,  /* IDLE state                    -> "Scanning!"                      */

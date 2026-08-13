@@ -11,17 +11,17 @@
 static I2C_HandleTypeDef *Oled_Handle;
 
 // FUNCTION DEFINITIONS
-static uint8_t Oled_Buffer[OLED_WIDTH * OLED_PAGES];
+static uint8_t Oled_Buffer[OLED_WIDTH * OLED_PAGES]; // nhân bản dữ liệu gửi qua OLED 
 static void Oled_WriteCommand(uint8_t cmd)
 {
-    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_CMD_MODE,
-                       I2C_MEMADD_SIZE_8BIT, &cmd, 1, HAL_MAX_DELAY);
-}
+    HAL_I2C_Mem_Write_DMA(Oled_Handle, OLED_I2C_ADDR, OLED_CMD_MODE,
+                       I2C_MEMADD_SIZE_8BIT, &cmd, 1);
+} //lệnh điều chỉnh cưởng độ sáng .....
 static void Oled_WriteData(const uint8_t *data, uint16_t size)
 {
-    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_DATA_MODE,
-                       I2C_MEMADD_SIZE_8BIT, (uint8_t *)data, size, HAL_MAX_DELAY);
-}
+    HAL_I2C_Mem_Write_DMA(Oled_Handle, OLED_I2C_ADDR, OLED_DATA_MODE,
+                       I2C_MEMADD_SIZE_8BIT, (uint8_t *)data, size);
+} //lệnh bật tắt pixel, ghi thẳng vào RAM
 static void Oled_UpdateScreen(void)
 {
     for (uint8_t page = 0; page < OLED_PAGES; page++) {
@@ -60,13 +60,12 @@ void Oled_Init(I2C_HandleTypeDef *i2c) {
     Oled_WriteCommand(0xAD); /* DC-DC control (SH1106 charge pump)*/
     Oled_WriteCommand(0x8B); /* -> enable internal DC-DC          */
     Oled_WriteCommand(0xAF); /* display ON                       */
- 
     Oled_Clear();
 }
 
 void Oled_Clear(void)
 {
-    memset(Oled_Buffer, 0x00, sizeof(Oled_Buffer));
+    memset(Oled_Buffer, 0x00, sizeof(Oled_Buffer));//void *memset(void *ptr, int value, size_t num);
     Oled_UpdateScreen();
 }
  
@@ -119,7 +118,7 @@ static const Oled_Glyph_t *Oled_FindGlyph(char ch)
             return &Oled_Font[i];
         }
     }
-    return &Oled_Font[0]; 
+    return &Oled_Font[0]; // nếu không có thì trả khoảng trắng
 }
 
 static void Oled_SetPixel(int16_t x, int16_t y)
@@ -128,7 +127,9 @@ static void Oled_SetPixel(int16_t x, int16_t y)
         return;
     }
     Oled_Buffer[x + (y / 8) * OLED_WIDTH] |= (1 << (y % 8));
-}
+} /* y/8 -> số trang - byte nào trong cột từ trên xuống theo cột
+     y%8 -> bit nào trong byte
+     1 << (y % 8) -> bật bit mà không làm ảnh hưởng các bit khác */
 
 static void Oled_DrawChar(int16_t x0, int16_t y0, char ch, uint8_t scale)
 {
@@ -145,13 +146,13 @@ static void Oled_DrawChar(int16_t x0, int16_t y0, char ch, uint8_t scale)
             }
         }
     }
-}
+}/* tìm ch , vẽ trên oled với scale*/
  
 static uint16_t Oled_TextWidth(const char *str, uint8_t scale)
 {
     uint16_t len = (uint16_t)strlen(str);
     if (len == 0) return 0;
-    return len * (GLYPH_W + GLYPH_GAP) * scale - GLYPH_GAP * scale;
+    return len * (GLYPH_W + GLYPH_GAP) * scale - GLYPH_GAP * scale;// khoảng cách chuỗi, chữ cuối không cần khoảng trống nên trừ ra
 }
 
 static void Oled_DrawLineCentered(const char *str, int16_t y0, uint8_t scale)
@@ -164,7 +165,7 @@ static void Oled_DrawLineCentered(const char *str, int16_t y0, uint8_t scale)
         Oled_DrawChar(x, y0, *p, scale);
         x += (GLYPH_W + GLYPH_GAP) * scale;
     }
-}
+}// căn giữa
 
 static void Oled_ShowLines(const char *line1, uint8_t scale1,
                             const char *line2, uint8_t scale2)
