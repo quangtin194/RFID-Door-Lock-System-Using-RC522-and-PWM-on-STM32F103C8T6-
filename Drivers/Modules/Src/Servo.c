@@ -11,6 +11,6 @@ void Servo_Init(Servo_t *servo) {
 }
 
 void Servo_SetAngle(uint8_t angle) {
-    uint16_t ccr = 1000 + ((1000 * angle) / 180);
+    uint16_t ccr = 1000 + ((1000 * angle) / 90);
     __HAL_TIM_SET_COMPARE(Servo_Handle->htim, Servo_Handle->Channel, ccr);
 }

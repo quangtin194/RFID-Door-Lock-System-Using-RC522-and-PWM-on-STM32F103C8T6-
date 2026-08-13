@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "Servo.h"
+#include "App.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +50,8 @@ TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
+  Servo_t servo = {&htim2, TIM_CHANNEL_1};
+  Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,18 +106,25 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  Servo_t servo = {&htim2, TIM_CHANNEL_1};
-  Servo_Init(&servo);
+  App_Init((Button_t){EXTI0_IRQn, EXTI1_IRQn},&buzzer, &huart1, &hi2c1, &hspi1, &servo);
+
+  // uint16_t angle;
+  // uint16_t ccr;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    Servo_SetAngle(90);
-    HAL_Delay(3000);
-    Servo_SetAngle(0);
-    HAL_Delay(3000);
+    App_Run();
+    //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
+    //   angle = 90;
+    //   ccr = 1000 + ((1000 * angle) / 180);
+    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
+    // HAL_Delay(1000);
+    // angle = 0;
+    // ccr = 1000 + ((1000 * angle) / 180);
+    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
