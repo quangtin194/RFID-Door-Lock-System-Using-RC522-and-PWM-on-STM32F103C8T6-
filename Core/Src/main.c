@@ -113,10 +113,33 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+<<<<<<< Updated upstream
     Servo_SetAngle(90);
     HAL_Delay(3000);
     Servo_SetAngle(0);
     HAL_Delay(3000);
+=======
+    App_Run();
+// char msg[32];
+
+// for (uint8_t addr = 1; addr < 127; addr++)
+// {
+//     if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 100) == HAL_OK)
+//     {
+//         int len = sprintf(msg, "I2C device: 0x%02X\r\n", addr);
+//         HAL_UART_Transmit(&huart1, (uint8_t *)msg, len, 100);
+//     }
+//     else HAL_UART_Transmit(&huart1, (uint8_t *)"No", 2, 100);
+// }
+    //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
+    //   angle = 90;
+    //   ccr = 1000 + ((1000 * angle) / 180);
+    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
+    // HAL_Delay(1000);
+    // angle = 0;
+    // ccr = 1000 + ((1000 * angle) / 180);
+    // __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
+>>>>>>> Stashed changes
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

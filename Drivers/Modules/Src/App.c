@@ -60,15 +60,16 @@ void App_Run(void) {
                 break;
             case ACCESS_ALLOWED:
                 Servo_SetAngle(OPEN_ANGLE);
-                Oled_Display("Welcome");
-                UART_PC_Print("Welcome ID: ...\n");
+                Oled_ShowStatus(OLED_MSG_WELCOME);
+                UART_PC_Print("Welcome ID: ");
+                UART_Print_UID();
 
                 break;
             case ACCESS_DENIED:
                 Oled_Display("Denied");
                 Buzzer_on();
-                UART_PC_Print("Denied ID: ...\n");
-                
+                UART_PC_Print("Denied ID: ");
+                UART_Print_UID();
                 break;
             case ADD_CARD:
                 Oled_Display("Scan to add");
@@ -79,8 +80,9 @@ void App_Run(void) {
 
                 break;
             case CARD_ADDED:
-                Oled_Display("Card Added");
-                UART_PC_Print("Save ID: ...\n");
+                Oled_ShowStatus(OLED_MSG_CARD_ADDED);
+                UART_PC_Print("Save ID: ");
+                UART_Print_UID();
 
                 break;
             case CARD_EXISTS:
@@ -88,9 +90,9 @@ void App_Run(void) {
 
                 break;
             case CARD_DELETED:
-                Oled_Display("Card Deleted");
-                UART_PC_Print("Delete ID: ...\n");
-
+                Oled_ShowStatus(OLED_MSG_CARD_DELETED);
+                UART_PC_Print("Delete ID: ");
+                UART_Print_UID();
                 break;
             case DELETE_DENIED:
                 if (uidStatus == UID_NEW) Oled_Display("Not Found");
