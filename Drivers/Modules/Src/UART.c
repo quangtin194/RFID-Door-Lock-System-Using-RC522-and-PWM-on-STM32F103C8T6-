@@ -1,8 +1,11 @@
 // INCLUDE & DEFINE
 #include "UART.h"
+#include "RC522.h"
 
 // VARIABLE DEFINITIONS
-static UART_HandleTypeDef *UART_Handle ;
+static UART_HandleTypeDef *UART_Handle = NULL;
+extern uint8_t CurrentUID[5];
+
 
 // FUNCTION DEFINITIONS
 void UART_Init(UART_HandleTypeDef *uart) {
@@ -10,7 +13,25 @@ void UART_Init(UART_HandleTypeDef *uart) {
 }
 
 void UART_PC_Print(const char* message) {
-    if (UART_Handle !=NULL){
-    HAL_UART_Transmit(UART_Handle,(uint8_t*)message,strlen(message),100);
+    if (UART_Handle != NULL && message != NULL) {
+        HAL_UART_Transmit(UART_Handle, (uint8_t*)message, (uint16_t)strlen(message), 100);
     }
 }
+
+void UART_Print_UID(void) {
+    if (UART_Handle == NULL) {
+        return; // Bảo vệ chống Crash/HardFault nếu chưa gọi UART_Init
+    }
+
+    uint8_t status = TM_MFRC522_Anticoll(CurrentUID);
+
+    // Kiểm tra trạng thái đọc thẻ (MI_OK = 0x00) trước khi xuất log
+    if (status == MI_OK) { 
+        char logStr[120];
+        snprintf(logStr, sizeof(logStr), "\r\n %02X %02X %02X %02X\r\n", 
+                 CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
+        
+        UART_PC_Print(logStr); // Tái sử dụng hàm UART_PC_Print đã có kiểm tra NULL
+    }
+}
+

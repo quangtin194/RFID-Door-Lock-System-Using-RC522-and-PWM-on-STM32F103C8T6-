@@ -73,14 +73,15 @@ void App_Run(void) {
             case ACCESS_ALLOWED:
                 Servo_SetAngle(OPEN_ANGLE);
                 Oled_ShowStatus(OLED_MSG_WELCOME);
-                UART_PC_Print("Welcome ID: ...\n");
+                UART_PC_Print("Welcome ID: ");
+                UART_Print_UID();
 
                 break;
             case ACCESS_DENIED:
                 Oled_ShowStatus(OLED_MSG_DENIED);
                 Buzzer_on();
-                UART_PC_Print("Denied ID: ...\n");
-                
+                UART_PC_Print("Denied ID: ");
+                UART_Print_UID();
                 break;
             case ADD_CARD:
                 Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
@@ -94,8 +95,8 @@ void App_Run(void) {
                 break;
             case CARD_ADDED:
                 Oled_ShowStatus(OLED_MSG_CARD_ADDED);
-                UART_PC_Print("Save ID: ...\n");
-
+                UART_PC_Print("Save ID: ");
+                UART_Print_UID();
                 break;
             case CARD_EXISTS:
                 Oled_ShowStatus(OLED_MSG_CARD_EXISTS);
@@ -104,7 +105,8 @@ void App_Run(void) {
                 break;
             case CARD_DELETED:
                 Oled_ShowStatus(OLED_MSG_CARD_DELETED);
-                UART_PC_Print("Delete ID: ..`.\n");
+                UART_PC_Print("Delete ID: ");
+                UART_Print_UID();
                 break;
             case DELETE_DENIED:
                 if (uidStatus == UID_NEW) 
@@ -165,7 +167,7 @@ void App_Run(void) {
             else
             {
                 if (RC522_UID_Detected() == RC522_OK){
-                    uidStatus = RC522_UID_CheckAorD();
+                    uidStatus = RC522_UID_Add();
                     if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN) appState = CARD_EXISTS;
                     else appState = CARD_ADDED;
                     Timeout_counter = HAL_GetTick();
@@ -178,7 +180,7 @@ void App_Run(void) {
             else
             {
                 if (RC522_UID_Detected() == RC522_OK){
-                    uidStatus = RC522_UID_CheckAorD();
+                    uidStatus = RC522_UID_Delete();
                     if (uidStatus == UID_EXIST) appState = CARD_DELETED;
                     else appState = DELETE_DENIED;
                     Timeout_counter = HAL_GetTick();

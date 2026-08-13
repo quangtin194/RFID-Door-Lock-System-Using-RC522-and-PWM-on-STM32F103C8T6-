@@ -16,22 +16,37 @@ uint8_t CurrentUID[5]; // Present UID
 uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};  // Admin Card UID
 uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user card UIDs
 
-static void RC522_UID_AddCard(void) {
+UID_Status_t RC522_UID_Add(void) {
+    if(memcmp(CurrentUID, AdminUID, 4) == 0) {
+        return UID_ADMIN; // Admin card cannot be added
+    }
+
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
+            return UID_EXIST; 
+        }
+    }
+
     for (int i = 0; i < MAX_CARDS; i++) {
         if (AuthorizedCards[i][0] == 0x00) {
             memcpy(AuthorizedCards[i], CurrentUID, 4); 
-            break; 
+            return UID_NEW; 
         }
     }
+    return UID_EXIST; 
 }
 
-static void RC522_UID_DeleteCard(void) {
+UID_Status_t RC522_UID_Delete(void) {
+    if(memcmp(CurrentUID, AdminUID, 4) == 0) {
+        return UID_ADMIN; // Admin card cannot be deleted
+    }
     for (int i = 0; i < MAX_CARDS; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
             memset(AuthorizedCards[i], 0x00, 4); 
-            break; 
+            return UID_EXIST;
         }
     }
+    return UID_NEW; // Card not found
 }
 RC522_Status_t RC522_UID_Detected(void) {
     uint8_t status;
@@ -59,20 +74,4 @@ UID_Status_t RC522_UID_Verify(void) {
         }
     }
     return UID_INVALID;
-}
-
-UID_Status_t RC522_UID_CheckAorD(void) {
-    UID_Status_t currentStatus = RC522_UID_Verify();
-
-    if (currentStatus == UID_ADMIN) {
-        return UID_ADMIN; 
-    } 
-    else if (currentStatus == UID_VALID) {
-        RC522_UID_DeleteCard();
-        return UID_EXIST;
-    } 
-    else {
-        RC522_UID_AddCard();
-        return UID_NEW;  
-    }
 }
