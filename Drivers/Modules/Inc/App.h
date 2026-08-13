@@ -8,7 +8,8 @@
 #include "Servo.h"
 #include "Buzzer.h"
 #include "Button.h"
-#include "stdint.h"
+#include <stdint.h>
+#include <string.h>
 
 #define CLOSE_ANGLE 0
 #define OPEN_ANGLE 90
