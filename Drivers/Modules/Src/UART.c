@@ -34,4 +34,4 @@ void UART_Print_UID(void) {
         UART_PC_Print(logStr); // Tái sử dụng hàm UART_PC_Print đã có kiểm tra NULL
     }
 }
->>>>>>> Stashed changes
+

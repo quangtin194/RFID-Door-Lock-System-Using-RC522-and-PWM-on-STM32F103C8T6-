@@ -11,7 +11,7 @@
 #include "stdint.h"
 
 #define CLOSE_ANGLE 0
-#define OPEN_ANGLE 90
+#define OPEN_ANGLE 89
 #define TIMEOUT_S_WAIT 1000    // Short wait
 #define TIMEOUT_L_WAIT 5000    // Long wait
 
@@ -36,7 +36,7 @@ typedef enum {
 
 // FUNCTION PROTOTYPES
 void App_Init(
-    Button_t button,
+    Button_t *button,
     Buzzer_t *buzzer,
     UART_HandleTypeDef *uart,
     I2C_HandleTypeDef *oled,
@@ -46,4 +46,3 @@ void App_Init(
 void App_Run(void);
 
 #endif 
-
