@@ -10,17 +10,19 @@ static UID_Status_t uidStatus;
 
 // XU LY NGAT EXTI
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-    if (appState ==ADMIN_MODE){
-        if (GPIO_Pin== Button_Handle.Add_Button){
-            appState=ADD_CARD;
+    if (appState == ADMIN_MODE) {
+        if (GPIO_Pin == Button_Handle.Add_but)
+        {
+            appState = ADD_CARD;
             Timeout_counter=HAL_GetTick(); 
-        }else if (GPIO_Pin ==Button_Handle.Del_Button){
-            appState=DELETE_CARD;
+        }
+        else if (GPIO_Pin == Button_Handle.Del_but)
+        {
+            appState = DELETE_CARD;
             Timeout_counter=HAL_GetTick();
         }
     }
 }
-// ..}..
 
 // FUNCTION DEFINITIONS
 void App_Init(
@@ -82,10 +84,12 @@ void App_Run(void) {
                 break;
             case ADD_CARD:
                 Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
+                UART_PC_Print("Add card\n");
 
                 break;
             case DELETE_CARD:
                 Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
+                UART_PC_Print("Delete card\n");
 
                 break;
             case CARD_ADDED:
@@ -95,6 +99,7 @@ void App_Run(void) {
                 break;
             case CARD_EXISTS:
                 Oled_ShowStatus(OLED_MSG_CARD_EXISTS);
+                UART_PC_Print("Card exists\n");
 
                 break;
             case CARD_DELETED:
@@ -102,8 +107,16 @@ void App_Run(void) {
                 UART_PC_Print("Delete ID: ..`.\n");
                 break;
             case DELETE_DENIED:
-                if (uidStatus == UID_NEW) Oled_ShowStatus(OLED_MSG_NOT_FOUND);
-                else if (uidStatus == UID_ADMIN) Oled_ShowStatus(OLED_MSG_ADMIN_CARD);
+                if (uidStatus == UID_NEW) 
+                {
+                    Oled_ShowStatus(OLED_MSG_NOT_FOUND);
+                    UART_PC_Print("UID Not found\n");
+                }
+                else if (uidStatus == UID_ADMIN) 
+                {
+                    Oled_ShowStatus(OLED_MSG_ADMIN_CARD);
+                    UART_PC_Print("Cannot delete Admin card\n");
+                }
                 break;
             case ERROR_STATE:
                 Button_DisableEXTI();
