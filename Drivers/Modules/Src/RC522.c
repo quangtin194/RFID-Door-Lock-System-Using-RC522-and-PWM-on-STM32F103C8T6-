@@ -1,24 +1,78 @@
 // INCLUDE & DEFINE
+
 #include "RC522.h"
 
+#define PICC_REQIDL    0x26
+#define MAX_CARDS 4
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
 
 // FUNCTION DEFINITIONS
 void RC522_Init(SPI_HandleTypeDef *spi) {
     RC522_Handle = spi;
+    TM_MFRC522_Init();
+}
+uint8_t CurrentUID[5]; // Present UID
+uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};  // Admin Card UID
+uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user card UIDs
+
+static void RC522_UID_AddCard(void) {
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] == 0x00) {
+            memcpy(AuthorizedCards[i], CurrentUID, 4); 
+            break; 
+        }
+    }
 }
 
+static void RC522_UID_DeleteCard(void) {
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
+            memset(AuthorizedCards[i], 0x00, 4); 
+            break; 
+        }
+    }
+}
 RC522_Status_t RC522_UID_Detected(void) {
-
-    return 0;  // Đại đại để compile
+    uint8_t status;
+    uint8_t respond[2];
+    status = TM_MFRC522_Request(PICC_REQIDL, respond);
+    if(status == MI_OK){
+        status = TM_MFRC522_Anticoll(CurrentUID);
+        if (status == MI_OK) 
+            return RC522_OK; 
+        else
+            return RC522_ERROR;  
+    }
+    return RC522_NO_CARD;
 }
 
 UID_Status_t RC522_UID_Verify(void) {
-
-    return 0;   // Đại đại để compile
+    if (memcmp(CurrentUID, AdminUID, 4) == 0) {
+        return UID_ADMIN;
+    }
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] != 0x00) { 
+            if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
+                return UID_VALID; 
+            }
+        }
+    }
+    return UID_INVALID;
 }
 
 UID_Status_t RC522_UID_CheckAorD(void) {
-    return 0;   // Đại đại để compile
+    UID_Status_t currentStatus = RC522_UID_Verify();
+
+    if (currentStatus == UID_ADMIN) {
+        return UID_ADMIN; 
+    } 
+    else if (currentStatus == UID_VALID) {
+        RC522_UID_DeleteCard();
+        return UID_EXIST;
+    } 
+    else {
+        RC522_UID_AddCard();
+        return UID_NEW;  
+    }
 }

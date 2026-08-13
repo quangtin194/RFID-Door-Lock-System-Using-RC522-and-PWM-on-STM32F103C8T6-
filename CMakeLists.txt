@@ -44,6 +44,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+    D:/DOCUMENT/CodeFile/F4BK/PRJ/Core/Src/mfrc522.c
     D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/App.c
     D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Buzzer.c
     D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Button.c
