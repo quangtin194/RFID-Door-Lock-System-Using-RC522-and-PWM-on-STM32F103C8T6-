@@ -7,6 +7,7 @@ static volatile AppState_t previous_State;
 static uint32_t Timeout_counter;
 static RC522_Status_t rc522Status;
 static UID_Status_t uidStatus;
+static Oled_Msg_t oled_status;
 
 // XU LY NGAT EXTI
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
@@ -57,7 +58,8 @@ void App_Run(void) {
                 Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_off();
-                Oled_ShowStatus(OLED_MSG_SCANNING);
+                oled_status = OLED_MSG_SCANNING;
+                Oled_ShowStatus(oled_status);
 
                 break;
             case VERIFY_UID:
@@ -66,44 +68,52 @@ void App_Run(void) {
             case ADMIN_MODE:
                 Button_EnableEXTI();
                 Servo_SetAngle(OPEN_ANGLE);
+                oled_status = OLED_MSG_ADMIN_MENU;
                 Oled_ShowStatus(OLED_MSG_ADMIN_MENU);
                 UART_PC_Print("Admin mode\n");
 
                 break;
             case ACCESS_ALLOWED:
                 Servo_SetAngle(OPEN_ANGLE);
+                oled_status = OLED_MSG_WELCOME;
                 Oled_ShowStatus(OLED_MSG_WELCOME);
                 UART_PC_Print("Welcome ID: ");
                 UART_Print_UID();
 
                 break;
             case ACCESS_DENIED:
+                oled_status = OLED_MSG_DENIED;
                 Oled_ShowStatus(OLED_MSG_DENIED);
                 Buzzer_on();
                 UART_PC_Print("Denied ID: ");
                 UART_Print_UID();
                 break;
             case ADD_CARD:
+                oled_status = OLED_MSG_SCAN_ADD_CARD;
                 Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
                 UART_PC_Print("Add card\n");
 
                 break;
             case DELETE_CARD:
+                oled_status = OLED_MSG_SCAN_DELETE_CARD;
                 Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
                 UART_PC_Print("Delete card\n");
 
                 break;
             case CARD_ADDED:
+                oled_status = OLED_MSG_CARD_ADDED;
                 Oled_ShowStatus(OLED_MSG_CARD_ADDED);
                 UART_PC_Print("Save ID: ");
                 UART_Print_UID();
                 break;
             case CARD_EXISTS:
+                oled_status = OLED_MSG_CARD_EXISTS;
                 Oled_ShowStatus(OLED_MSG_CARD_EXISTS);
                 UART_PC_Print("Card exists\n");
 
                 break;
             case CARD_DELETED:
+                oled_status = OLED_MSG_CARD_DELETED;
                 Oled_ShowStatus(OLED_MSG_CARD_DELETED);
                 UART_PC_Print("Delete ID: ");
                 UART_Print_UID();
@@ -111,11 +121,13 @@ void App_Run(void) {
             case DELETE_DENIED:
                 if (uidStatus == UID_NEW) 
                 {
+                    oled_status = OLED_MSG_NOT_FOUND;
                     Oled_ShowStatus(OLED_MSG_NOT_FOUND);
                     UART_PC_Print("UID Not found\n");
                 }
                 else if (uidStatus == UID_ADMIN) 
                 {
+                    oled_status = OLED_MSG_ADMIN_CARD;
                     Oled_ShowStatus(OLED_MSG_ADMIN_CARD);
                     UART_PC_Print("Cannot delete Admin card\n");
                 }
@@ -125,6 +137,7 @@ void App_Run(void) {
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
                 UART_PC_Print("ERROR\n");
+                oled_status = OLED_MSG_ERROR;
                 Oled_ShowStatus(OLED_MSG_ERROR);
                 break;
             default:
