@@ -1,8 +1,8 @@
 // INCLUDE & DEFINE
-#include "Oled.h"
+#include "Servo.h"
 
 // VARIABLE DEFINITIONS
-static I2C_HandleTypeDef *Oled_Handle;
+static Servo_t *Servo_Handle;
 
 // FUNCTION DEFINITIONS
 void Servo_Init(Servo_t *servo) {

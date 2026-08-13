@@ -3,6 +3,7 @@
 
 // INCLUDE & DEFINE
 #include "stm32f1xx_hal.h"
+#include <string.h>
 
 // FUNCTION PROTOTYPES
 void UART_Init(UART_HandleTypeDef *uart);

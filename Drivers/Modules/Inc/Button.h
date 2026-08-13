@@ -11,8 +11,11 @@ typedef struct {
         IRQn_Type Del_Button;
     } Button_t;
 
+
+extern Button_t Button_Handle;
+
 // FUNCTION PROTOTYPES
-void Button_Init(Button_t button);
+void Button_Init(Button_t *button);
 void Button_EnableEXTI(void);
 void Button_DisableEXTI(void);
 
