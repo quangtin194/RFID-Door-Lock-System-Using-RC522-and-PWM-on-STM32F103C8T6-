@@ -7,8 +7,9 @@
 #include "RC522.h"
 #include "Servo.h"
 #include "Buzzer.h"
-#include "Button.h"
+//#include "Button.h"
 #include "stdint.h"
+#include "Keypad.h"
 
 #define CLOSE_ANGLE 0
 #define OPEN_ANGLE 90
@@ -25,18 +26,19 @@ typedef enum {
     ACCESS_DENIED,
     ADD_CARD,
     DELETE_CARD,
+    DELETE_MENU,
+    DELETE_BY_SCAN,
     CARD_ADDED,
     CARD_EXISTS,
     CARD_DELETED,
     DELETE_DENIED,
     ERROR_STATE
-
 } AppState_t;
 
 
 // FUNCTION PROTOTYPES
 void App_Init(
-    Button_t *button,
+    Keypad_t *keypad,
     Buzzer_t *buzzer,
     UART_HandleTypeDef *uart,
     I2C_HandleTypeDef *oled,

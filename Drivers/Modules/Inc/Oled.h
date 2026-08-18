@@ -29,6 +29,8 @@ typedef enum {
     OLED_MSG_ADMIN_CARD,
     OLED_MSG_SCAN_ADD_CARD,
     OLED_MSG_SCAN_DELETE_CARD,
+    OLED_CONFIRM,
+    OLED_MSG_DELETE_MENU,
     OLED_MSG_ERROR
 } Oled_Msg_t;
 
@@ -38,5 +40,7 @@ void Oled_Init(I2C_HandleTypeDef *hi2c);
 void Oled_Clear(void);
 
 void Oled_ShowStatus(Oled_Msg_t msg); // thay Oled_Display()
+
+void Oled_ShowCardList(uint8_t uids[4][4]); // danh sach 4 the, 2 dong x 2 the
 
 #endif

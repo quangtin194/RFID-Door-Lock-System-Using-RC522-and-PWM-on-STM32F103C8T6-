@@ -80,6 +80,14 @@ static const Oled_Glyph_t Oled_Font[] = {
     { '/', { 0x40, 0x30, 0x08, 0x06, 0x01 } },
     { '1', { 0x00, 0x42, 0x7F, 0x40, 0x00 } },
     { '2', { 0x42, 0x61, 0x51, 0x49, 0x46 } },
+    { '0', { 0x3E, 0x51, 0x49, 0x45, 0x3E } },
+    { '3', { 0x22, 0x49, 0x49, 0x49, 0x36 } },
+    { '4', { 0x0C, 0x14, 0x24, 0x7F, 0x04 } },
+    { '5', { 0x4F, 0x49, 0x49, 0x49, 0x31 } },
+    { '6', { 0x3C, 0x4A, 0x49, 0x49, 0x30 } },
+    { '7', { 0x01, 0x71, 0x09, 0x05, 0x03 } },
+    { '8', { 0x36, 0x49, 0x49, 0x49, 0x36 } },
+    { '9', { 0x06, 0x49, 0x49, 0x29, 0x1E } },
     { ':', { 0x00, 0x00, 0x14, 0x00, 0x00 } },
     { 'A', { 0x7C, 0x12, 0x11, 0x12, 0x7C } },
     { 'B', { 0x7F, 0x49, 0x49, 0x49, 0x36 } },
@@ -93,6 +101,7 @@ static const Oled_Glyph_t Oled_Font[] = {
     { 'S', { 0x46, 0x49, 0x49, 0x49, 0x31 } },
     { 'T', { 0x01, 0x01, 0x7F, 0x01, 0x01 } },
     { 'W', { 0x7F, 0x20, 0x18, 0x20, 0x7F } },
+    { 'I', { 0x00, 0x41, 0x7F, 0x41, 0x00 } },
     { 'a', { 0x30, 0x4A, 0x4A, 0x2A, 0x7C } },
     { 'c', { 0x3C, 0x42, 0x42, 0x42, 0x00 } },
     { 'd', { 0x38, 0x44, 0x44, 0x44, 0x7F } },
@@ -109,6 +118,17 @@ static const Oled_Glyph_t Oled_Font[] = {
     { 't', { 0x00, 0x02, 0x3F, 0x42, 0x40 } },
     { 'u', { 0x3C, 0x40, 0x40, 0x20, 0x7C } },
     { 'x', { 0x44, 0x28, 0x10, 0x28, 0x44 } },
+    { '#', { 0x14, 0x7F, 0x14, 0x7F, 0x14 } },
+    { '*', { 0x08, 0x2A, 0x1C, 0x2A, 0x08 } },
+    { '0', { 0x3E, 0x51, 0x49, 0x45, 0x3E } },
+    { '3', { 0x21, 0x41, 0x45, 0x4B, 0x31 } },
+    { '4', { 0x18, 0x14, 0x12, 0x7F, 0x10 } },
+    { '5', { 0x27, 0x45, 0x45, 0x45, 0x39 } },
+    { '6', { 0x3C, 0x4A, 0x49, 0x49, 0x30 } },
+    { '7', { 0x01, 0x71, 0x09, 0x05, 0x03 } },
+    { '8', { 0x36, 0x49, 0x49, 0x49, 0x36 } },
+    { '9', { 0x06, 0x49, 0x49, 0x29, 0x1E } },
+    { '>', { 0x00, 0x41, 0x22, 0x14, 0x08 } },
 };
 
 static const Oled_Glyph_t *Oled_FindGlyph(char ch)
@@ -199,7 +219,7 @@ void Oled_ShowStatus(Oled_Msg_t msg)
             Oled_ShowLines("Denied!", 2, NULL, 0);
             break;
         case OLED_MSG_ADMIN_MENU:
-            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DELETE", 1);
+            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL #:Canc", 1);
             break;
         case OLED_MSG_SCAN_ADD_CARD:
             Oled_ShowLines("Scan", 2, "to add!", 2);
@@ -225,10 +245,55 @@ void Oled_ShowStatus(Oled_Msg_t msg)
         case OLED_MSG_ADMIN_CARD:
             Oled_ShowLines("No Delete", 2, "Admin!", 2);
             break;
+        case OLED_CONFIRM:
+            Oled_ShowLines("*: Confirm", 1, "#: Cancel", 1);
+            break;
+        case OLED_MSG_DELETE_MENU:
+            Oled_ShowLines("Delete", 2, "1:Scan 2:Index", 1);
+            break;
         default:
             Oled_ShowLines("Scanning!", 2, NULL, 0);
             break;
     }
+}
+
+static char Oled_NibbleToHex(uint8_t nibble)
+{
+    nibble &= 0x0F;
+    return (nibble < 10) ? (char)('0' + nibble) : (char)('A' + nibble - 10);
+}
+
+/* Hien thi 4 the da dang ky: 2 dong, moi dong 2 the.
+ * Format: "1:AABBCCDD 2:DDEEFFAA"  (21 ky tu, scale 1 -> vua 128px)
+ *         "3:BBCCDDEE 4:00000000"  (slot trong hien 00000000) */
+void Oled_ShowCardList(uint8_t uids[4][4])
+{
+    char line1[22] = {0};
+    char line2[22] = {0};
+    char *p = line1;
+
+    for (uint8_t i = 0; i < 2; i++) {
+        if (i > 0) *p++ = ' ';
+        *p++ = (char)('1' + i);
+        *p++ = ':';
+        for (uint8_t j = 0; j < 4; j++) {
+            *p++ = Oled_NibbleToHex(uids[i][j] >> 4);
+            *p++ = Oled_NibbleToHex(uids[i][j] & 0x0F);
+        }
+    }
+
+    p = line2;
+    for (uint8_t i = 2; i < 4; i++) {
+        if (i > 2) *p++ = ' ';
+        *p++ = (char)('1' + i);
+        *p++ = ':';
+        for (uint8_t j = 0; j < 4; j++) {
+            *p++ = Oled_NibbleToHex(uids[i][j] >> 4);
+            *p++ = Oled_NibbleToHex(uids[i][j] & 0x0F);
+        }
+    }
+
+    Oled_ShowLines(line1, 1, line2, 1);
 }
 
 

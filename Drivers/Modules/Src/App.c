@@ -1,33 +1,31 @@
 // INCLUDE & DEFINE
 #include "App.h"
-
+#include "Keypad.h"
+#include "Oled.h"
+#include <stdbool.h>
 // VARIABLE DEFINITIONS
+static volatile bool confirmPending = false; // đang chờ xác nhận có thẻ hay không? 
 static volatile AppState_t appState;
 static volatile AppState_t previous_State;
 static uint32_t Timeout_counter;
 static RC522_Status_t rc522Status;
 static UID_Status_t uidStatus;
 static Oled_Msg_t oled_status;
+static uint8_t selectedIndex;    // STT the dang chon trong che do xoa (1-4), 0 = chua chon
 
-// XU LY NGAT EXTI
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-    if (appState == ADMIN_MODE) {
-        if (GPIO_Pin == Button_Handle.Add_but)
-        {
-            appState = ADD_CARD;
-            Timeout_counter=HAL_GetTick(); 
-        }
-        else if (GPIO_Pin == Button_Handle.Del_but)
-        {
-            appState = DELETE_CARD;
-            Timeout_counter=HAL_GetTick();
-        }
+// Hien danh sach 4 the da luu len OLED
+static void App_ShowCardList(void)
+{
+    uint8_t uids[4][4] = {0};
+    for (uint8_t i = 0; i < 4; i++) {
+        RC522_GetUID(i + 1, uids[i]);
     }
+    Oled_ShowCardList(uids);
 }
 
 // FUNCTION DEFINITIONS
 void App_Init(
-    Button_t *button,
+    Keypad_t *keypad,
     Buzzer_t *buzzer,
     UART_HandleTypeDef *uart,
     I2C_HandleTypeDef *oled,
@@ -41,7 +39,7 @@ void App_Init(
     RC522_Init(rc522);
     Servo_Init(servo);
     Buzzer_Init(buzzer);
-    Button_Init(button);
+    Keypad_Init(keypad);
 
     // Trang thai ban dau    
     appState = IDLE;
@@ -55,7 +53,6 @@ void App_Run(void) {
         previous_State = appState;
         switch (appState) {
             case IDLE:
-                Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_off();
                 oled_status = OLED_MSG_SCANNING;
@@ -66,7 +63,6 @@ void App_Run(void) {
 
                 break;
             case ADMIN_MODE:
-                Button_EnableEXTI();
                 Servo_SetAngle(OPEN_ANGLE);
                 oled_status = OLED_MSG_ADMIN_MENU;
                 Oled_ShowStatus(OLED_MSG_ADMIN_MENU);
@@ -89,36 +85,66 @@ void App_Run(void) {
                 UART_Print_UID();
                 break;
             case ADD_CARD:
+                confirmPending = false;   // reset: tranh bi ket o trang thai cho xac nhan cu
                 oled_status = OLED_MSG_SCAN_ADD_CARD;
                 Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
                 UART_PC_Print("Add card\n");
+                break;
+            case DELETE_MENU:
+                confirmPending = false;
+                oled_status = OLED_MSG_DELETE_MENU;
+                Oled_ShowStatus(OLED_MSG_DELETE_MENU);
+                UART_PC_Print("Delete: 1=Scan 2=Index #:back\n");
+
+                break;
+            case DELETE_BY_SCAN:
+                confirmPending = false;
+                selectedIndex = 0;
+                oled_status = OLED_MSG_SCAN_DELETE_CARD;
+                Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
+                UART_PC_Print("Scan card to delete\n");
 
                 break;
             case DELETE_CARD:
-                oled_status = OLED_MSG_SCAN_DELETE_CARD;
-                Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
-                UART_PC_Print("Delete card\n");
+                confirmPending = false;
+                selectedIndex = 0;
+                App_ShowCardList();
+                UART_PC_Print("Delete card (1-4) #:cancel\n");
 
                 break;
             case CARD_ADDED:
+                confirmPending = false;
                 oled_status = OLED_MSG_CARD_ADDED;
                 Oled_ShowStatus(OLED_MSG_CARD_ADDED);
                 UART_PC_Print("Save ID: ");
                 UART_Print_UID();
                 break;
             case CARD_EXISTS:
+                confirmPending = false;
                 oled_status = OLED_MSG_CARD_EXISTS;
                 Oled_ShowStatus(OLED_MSG_CARD_EXISTS);
                 UART_PC_Print("Card exists\n");
 
                 break;
             case CARD_DELETED:
+                confirmPending = false;
                 oled_status = OLED_MSG_CARD_DELETED;
                 Oled_ShowStatus(OLED_MSG_CARD_DELETED);
-                UART_PC_Print("Delete ID: ");
-                UART_Print_UID();
+                if (selectedIndex != 0)     // xoa theo STT
+                {
+                    char idxStr[2] = { (char)('0' + selectedIndex), '\0' };
+                    UART_PC_Print("Deleted card: ");
+                    UART_PC_Print(idxStr);
+                    UART_PC_Print("\n");
+                }
+                else                        // xoa bang quet the
+                {
+                    UART_PC_Print("Delete ID: ");
+                    UART_Print_UID();
+                }
                 break;
             case DELETE_DENIED:
+                confirmPending = false;
                 if (uidStatus == UID_NEW) 
                 {
                     oled_status = OLED_MSG_NOT_FOUND;
@@ -133,7 +159,6 @@ void App_Run(void) {
                 }
                 break;
             case ERROR_STATE:
-                Button_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
                 UART_PC_Print("ERROR\n");
@@ -164,11 +189,20 @@ void App_Run(void) {
             break;
         case ADMIN_MODE:
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-            // Ngắt sẽ thay đổi luồng chương trình, nhớ trong hàm xử lý ngắt có update Timeout_counter nha
+            else
+            {
+                // Keypad dieu khien (quet lien tuc moi vong lap, khong can ngat)
+                uint8_t key = Keypad_Scan();
+                if (key == '1')      { appState = ADD_CARD;     Timeout_counter = HAL_GetTick(); }
+                else if (key == '2') { appState = DELETE_MENU;  Timeout_counter = HAL_GetTick(); }
+                else if (key == '#') { appState = IDLE;         Timeout_counter = HAL_GetTick(); }
+                // Luu y: phai gia han Timeout_counter khi bam phim,
+                // khong thi ADMIN_MODE se het 5s va thoat ngay lap tuc.
+            }
 
             break;
         case ACCESS_ALLOWED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
 
             break;
         case ACCESS_DENIED:
@@ -176,31 +210,127 @@ void App_Run(void) {
 
             break;
         case ADD_CARD:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-            else
+        {
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
             {
-                if (RC522_UID_Detected() == RC522_OK){
+                
+                appState = IDLE;
+                break;
+            }
+            uint8_t key = Keypad_Scan();        // quet 1 lan moi vong lap
+            if (key == '#') { appState = ADMIN_MODE; Timeout_counter = HAL_GetTick(); break; }  // '*' = huy
+            if (!confirmPending) {
+                if (RC522_UID_Detected() == RC522_OK)
+                {
+                confirmPending = true;
+                Oled_ShowStatus(OLED_CONFIRM);
+                Timeout_counter = HAL_GetTick();  // gia han de nguoi dung kip bam '#'
+                }
+            }
+            else {
+                if (key == '*'){
                     uidStatus = RC522_UID_Add();
                     if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN) appState = CARD_EXISTS;
                     else appState = CARD_ADDED;
                     Timeout_counter = HAL_GetTick();
                 }
             }
-
             break;
-        case DELETE_CARD:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
+        }
+        case DELETE_MENU:
+        {
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+            {
+                appState = IDLE;
+                break;
+            }
+            uint8_t key = Keypad_Scan();        // quet 1 lan moi vong lap
+            if (key == '1')      { appState = DELETE_BY_SCAN; Timeout_counter = HAL_GetTick(); }
+            else if (key == '2') { appState = DELETE_CARD;     Timeout_counter = HAL_GetTick(); }
+            else if (key == '#') { appState = ADMIN_MODE;      Timeout_counter = HAL_GetTick(); }
+            break;
+        }
+        case DELETE_BY_SCAN:
+        {
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+            {
+                appState = IDLE;
+                break;
+            }
+            uint8_t key = Keypad_Scan();        // quet 1 lan moi vong lap
+            if (!confirmPending)
+            {
+                if (key == '#')
+                {
+                    appState = DELETE_MENU;     // quay ve menu chon cach xoa
+                    Timeout_counter = HAL_GetTick();
+                }
+                else if (RC522_UID_Detected() == RC522_OK)
+                {
+                    confirmPending = true;
+                    Oled_ShowStatus(OLED_CONFIRM);
+                    Timeout_counter = HAL_GetTick(); // gia han
+                }
+            }
             else
             {
-                if (RC522_UID_Detected() == RC522_OK){
+                if (key == '*')                 // xac nhan xoa the da quet
+                {
                     uidStatus = RC522_UID_Delete();
                     if (uidStatus == UID_EXIST) appState = CARD_DELETED;
                     else appState = DELETE_DENIED;
                     Timeout_counter = HAL_GetTick();
                 }
+                else if (key == '#')            // bo xac nhan, quay ve trang scan
+                {
+                    confirmPending = false;
+                    Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
+                    Timeout_counter = HAL_GetTick();
+                }
             }
-
             break;
+        }
+        case DELETE_CARD:
+        {
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+            {
+                appState = IDLE;
+                break;
+            }
+            uint8_t key = Keypad_Scan();        // quet 1 lan moi vong lap
+
+            if (selectedIndex == 0)             // dang xem danh sach the
+            {
+                if (key >= '1' && key <= '4')
+                {
+                    selectedIndex = (uint8_t)(key - '0');  // chon the can xoa
+                    Oled_ShowStatus(OLED_CONFIRM);
+                    Timeout_counter = HAL_GetTick();       // gia han
+                }
+                else if (key == '#')
+                {
+                    appState = DELETE_MENU;                // quay ve menu chon cach xoa
+                    Timeout_counter = HAL_GetTick();
+                }
+            }
+            else                                // dang cho xac nhan xoa the selectedIndex
+            {
+                if (key == '*')                 // xac nhan xoa
+                {
+                    uidStatus = RC522_DeleteByIndex(selectedIndex);
+                    if (uidStatus == UID_EXIST) appState = CARD_DELETED;
+                    else appState = DELETE_DENIED;
+                    Timeout_counter = HAL_GetTick();
+                }
+                else if (key == '#')            // bo xac nhan, quay ve danh sach
+                {
+                    selectedIndex = 0;
+                    App_ShowCardList();
+                    Timeout_counter = HAL_GetTick();
+                }
+            }
+            break;
+        }
         case CARD_ADDED:
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
 

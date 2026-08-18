@@ -2,7 +2,6 @@
 #include "RC522.h"
 
 #define PICC_REQIDL    0x26
-#define MAX_CARDS 4
 
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
@@ -35,18 +34,49 @@ UID_Status_t RC522_UID_Add(void) {
     }
     return UID_EXIST; 
 }
-
 UID_Status_t RC522_UID_Delete(void) {
     if(memcmp(CurrentUID, AdminUID, 4) == 0) {
         return UID_ADMIN; // Admin card cannot be deleted
     }
     for (int i = 0; i < MAX_CARDS; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
-            memset(AuthorizedCards[i], 0x00, 4); 
+            memset(AuthorizedCards[i], 0x00, 4); // ghi đè
             return UID_EXIST;
         }
     }
     return UID_NEW; // Card not found
+}
+
+uint8_t RC522_GetCardCount(void) {
+    uint8_t count = 0;
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] != 0x00) {
+            count++;
+        }
+    }
+    return count;
+}
+
+uint8_t RC522_GetUID(uint8_t index, uint8_t *out) {
+    if (index < 1 || index > MAX_CARDS || out == NULL) {
+        return 0;
+    }
+    if (AuthorizedCards[index - 1][0] == 0x00) {
+        return 0;   // slot trong
+    }
+    memcpy(out, AuthorizedCards[index - 1], 4);
+    return 1;
+}
+
+UID_Status_t RC522_DeleteByIndex(uint8_t index) {
+    if (index < 1 || index > MAX_CARDS) {
+        return UID_NEW;
+    }
+    if (AuthorizedCards[index - 1][0] == 0x00) {
+        return UID_NEW; // slot trong, khong co gi de xoa
+    }
+    memset(AuthorizedCards[index - 1], 0x00, 4);
+    return UID_EXIST;
 }
 
 RC522_Status_t RC522_UID_Detected(void) {
