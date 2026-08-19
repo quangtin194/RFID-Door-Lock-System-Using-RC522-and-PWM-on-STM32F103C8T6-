@@ -232,3 +232,8 @@ void Oled_ShowStatus(Oled_Msg_t msg)
 }
 
 
+// Nhung ham moi
+void Oled_ShowPasswordMask(uint8_t length) {
+    
+}
+
