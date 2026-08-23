@@ -110,14 +110,14 @@ void App_Run(void) {
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
 
-                // Exponential backoff: tang muc khoa 3s, 6s, 12s, 24s
+                // Từng level khóa: lv1 khoa 3s, lv2 khoa 6s, lv3 khoa 12s, lv4 khoa 24s
                 Lock_Level++;
                 if (Lock_Level > 4) Lock_Level = 4;
                 Lock_Duration = LOCK * (1UL << (Lock_Level - 1));
                 Timeout_counter = HAL_GetTick();
                 Last_Lock_Second = 0;
 
-                Oled_ShowLockCountdown(Lock_Duration / 1000);
+                Oled_ShowLockCountdown(Lock_Duration / 1000); // Hiển thị CountDown trên OLED
                 UART_PC_Print("System locked\n");
                 break;
 
@@ -314,23 +314,15 @@ void App_Run(void) {
         case LOCKED:
         {
             uint32_t elapsed = HAL_GetTick() - Timeout_counter;
-            if (elapsed >= Lock_Duration && Lock_Level < 4) {
+            if (elapsed >= Lock_Duration) {
                 appState = IDLE;
             }
-            else if (elapsed < Lock_Duration) {
+            else {
                 // Cap nhat OLED moi giay mot lan
                 uint32_t remaining_sec = (Lock_Duration - elapsed + 999) / 1000;
                 if (remaining_sec != Last_Lock_Second) {
                     Last_Lock_Second = remaining_sec;
                     Oled_ShowLockCountdown(remaining_sec);
-                }
-            }
-            else {
-                // Cap 4 tro len: khoa cung, chi the Admin moi mo duoc khoa.
-                rc522Status = RC522_UID_Detected();
-                if (rc522Status == RC522_OK && RC522_UID_Verify() == UID_ADMIN) {
-                    Lock_Level = 0;
-                    appState = ADMIN_MODE;
                 }
             }
             break;

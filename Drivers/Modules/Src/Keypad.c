@@ -11,7 +11,7 @@ Keypad_t Keypad_Handle;
 #define PASSWORD_LENGTH 4
 static uint8_t Password_Buffer[PASSWORD_LENGTH] = {0};
 static uint8_t Password_Index = 0;
-static const uint8_t Password_Store[PASSWORD_LENGTH] = {1, 2, 3, 4}; // Mat khau mac dinh: 1234
+static const uint8_t Password_Store[PASSWORD_LENGTH] = {1, 2, 3, 4}; //pass:1234
 
 // FUNCTION DEFINITIONS
 void Keypad_Init(Keypad_t *keypad) {
@@ -51,9 +51,7 @@ Key_t Keypad_Scan(void) {
         {KEY_7,KEY_8,KEY_9},
         {KEY_THANG,KEY_0,KEY_SAO},
     };
-    Keypad_DisableEXTI();  // Tat ngat trong khi scan de tranh cham
-    HAL_Delay(20);         // Chong rung
-
+    Keypad_DisableEXTI();  //tắt ngắt để phòng ngừa
     for (uint8_t r = 0; r < KEYPAD_ROWS; r++) {
         for (uint8_t i = 0; i < KEYPAD_ROWS; i++) {
             HAL_GPIO_WritePin(rowPorts[i], rowPins[i], GPIO_PIN_SET);
@@ -70,12 +68,12 @@ Key_t Keypad_Scan(void) {
         if (key != KEY_NONE) break;
     }
 
-    // Tra ve trang thai idle: tat ca hang ve muc thap (LOW)
+    // Trả về low
     for (uint8_t i = 0; i < KEYPAD_ROWS; i++) {
         HAL_GPIO_WritePin(rowPorts[i], rowPins[i], GPIO_PIN_RESET);
     }
 
-    // Cho nha phim de moi lan nhan chi bao dung 1 phim
+    // Debounce
     uint32_t release_start = HAL_GetTick();
     while (HAL_GetTick() - release_start < 500) {
         uint8_t released = 1;
@@ -89,7 +87,7 @@ Key_t Keypad_Scan(void) {
         HAL_Delay(1);
     }
 
-    Keypad_EnableEXTI();
+    Keypad_EnableEXTI();// bật ngắt lại 
     return key;
 }
 void Keypad_Password_Append(Key_t key) {
