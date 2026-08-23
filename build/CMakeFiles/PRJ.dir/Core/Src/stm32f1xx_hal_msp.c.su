@@ -1,0 +1,10 @@
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:64:6:HAL_MspInit	24	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:91:6:HAL_I2C_MspInit	40	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:126:6:HAL_I2C_MspDeInit	16	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:157:6:HAL_SPI_MspInit	40	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:198:6:HAL_SPI_MspDeInit	16	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:228:6:HAL_TIM_Base_MspInit	24	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:248:6:HAL_TIM_MspPostInit	40	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:278:6:HAL_TIM_Base_MspDeInit	16	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:303:6:HAL_UART_MspInit	40	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Core/Src/stm32f1xx_hal_msp.c:346:6:HAL_UART_MspDeInit	16	static
