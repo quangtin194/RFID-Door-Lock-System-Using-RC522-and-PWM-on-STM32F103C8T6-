@@ -205,4 +205,26 @@ UID_Status_t RC522_UID_AddAD(void) {
     return UID_NEW; 
 }
 
+UID_Status_t RC522_UID_DelAD(void) {
+    if (memcmp(CurrentUID, AdminUID, 4) == 0) {
+        return UID_ADMIN;
+    }
+
+    for (int i = 0; i < AdminCount; i++) {
+        if (memcmp(CurrentUID, AdminUIDs[i], 4) == 0) {
+            for (int j = i; j < AdminCount - 1; j++) {
+                memcpy(AdminUIDs[j], AdminUIDs[j + 1], 4);
+            }
+
+            memset(AdminUIDs[AdminCount - 1], 0x00, 4);
+            AdminCount--;
+
+            Flash_Save_Cards();
+
+            return UID_EXIST;
+        }
+    }
+
+    return UID_NEW;
+}
 // new

@@ -208,7 +208,7 @@ void Oled_ShowStatus(Oled_Msg_t msg)
             Oled_ShowLines("Denied!", 2, NULL, 0);
             break;
         case OLED_MSG_ADMIN_MENU:
-            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:CA", 1);
+            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
             break;
         case OLED_MSG_SCAN_ADD_CARD:
             Oled_ShowLines("Scan", 2, "to add!", 2);
@@ -241,10 +241,14 @@ void Oled_ShowStatus(Oled_Msg_t msg)
             Oled_ShowLines("Secure!", 2, NULL, 0);
             break;
         case OLED_MSG_SCAN_NEW_ADMIN:
+        case OLED_MSG_SCAN_DEL_ADMIN:
             Oled_ShowLines("Scan", 2, "Admin!", 2);
             break;
-        case OLED_MSG_ADMIN_CHANGED:
-            Oled_ShowLines("Admin", 2, "Done!", 2);
+        case OLED_MSG_ADMIN_ADDED:
+            Oled_ShowLines("Admin", 2, "Added!", 2);
+            break;
+        case OLED_MSG_ADMIN_DELETED:
+            Oled_ShowLines("Admin", 2, "Deleted!", 2);
             break;
         case OLED_MSG_ADMIN_CHANGE_DENIED:
             Oled_ShowLines("Admin", 2, "Denied!", 2);
