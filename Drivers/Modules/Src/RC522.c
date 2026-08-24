@@ -2,13 +2,19 @@
 #include "RC522.h"
 
 #define PICC_REQIDL    0x26
-#define MAX_CARDS 4
+#define FLASH_USER_START_ADDR   0x0800FC00
+#define MAX_CARDS 5
+#define MAX_ADMINS 3
 
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
 uint8_t CurrentUID[5]; // Present UID
 uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};  // Admin Card UID
-uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user card UIDs
+uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user
+uint8_t CardCount = 0;
+uint8_t AdminUIDs[MAX_ADMINS][4]; 
+uint8_t AdminCount = 0;
+//  card UIDs
 
 // FUNCTION DEFINITIONS
 void RC522_Init(SPI_HandleTypeDef *spi) {
@@ -95,33 +101,39 @@ void Flash_Load_Cards(void) {
     }
 }
 UID_Status_t RC522_UID_Add(void) {
-    if(memcmp(CurrentUID, AdminUID, 4) == 0) {
+    if (CardCount >= MAX_CARDS) return UID_INVALID;
+    if(Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN; 
     }
 
-    for (int i = 0; i < MAX_CARDS; i++) {
+    for (int i = 0; i < CardCount; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
             return UID_EXIST; 
         }
     }
 
-    for (int i = 0; i < MAX_CARDS; i++) {
-        if (AuthorizedCards[i][0] == 0x00) {
-            memcpy(AuthorizedCards[i], CurrentUID, 4); 
-            return UID_NEW; 
-        }
-    }
-    return UID_EXIST; 
+    memcpy(AuthorizedCards[CardCount], CurrentUID, 4);
+    CardCount++;
+    Flash_Save_Cards();
+
+    return UID_NEW;
 }
 
 UID_Status_t RC522_UID_Delete(void) {
-    if(memcmp(CurrentUID, AdminUID, 4) == 0) {
+    if(Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN; // Admin card cannot be deleted
     }
-    for (int i = 0; i < MAX_CARDS; i++) {
+    for (int i = 0; i < CardCount; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
-            memset(AuthorizedCards[i], 0x00, 4); 
-            return UID_EXIST;
+            for (int j = i; j < CardCount - 1; j++) {
+                memcpy(AuthorizedCards[j], AuthorizedCards[j + 1], 4);
+            }
+            
+            memset(AuthorizedCards[CardCount - 1], 0x00, 4); 
+            CardCount--;          
+            Flash_Save_Cards();   
+            
+            return UID_EXIST; 
         }
     }
     return UID_NEW; // Card not found
@@ -148,7 +160,7 @@ RC522_Status_t RC522_UID_Detected(void) {
 }
 
 UID_Status_t RC522_UID_Verify(void) {
-    if (memcmp(CurrentUID, AdminUID, 4) == 0) {
+    if (Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN;
     }
     for (int i = 0; i < MAX_CARDS; i++) {
@@ -160,7 +172,6 @@ UID_Status_t RC522_UID_Verify(void) {
     }
     return UID_INVALID;
 }
-
 
 // Nhung ham moi
 UID_Status_t RC522_UID_AddAD(void) {
