@@ -2,48 +2,136 @@
 #include "RC522.h"
 
 #define PICC_REQIDL    0x26
-#define MAX_CARDS 4
+#define FLASH_USER_START_ADDR   0x0800FC00
+#define MAX_CARDS 5
+#define MAX_ADMINS 3
 
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
 uint8_t CurrentUID[5]; // Present UID
 uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};  // Admin Card UID
-uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user card UIDs
+uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user
+uint8_t CardCount = 0;
+uint8_t AdminUIDs[MAX_ADMINS][4]; 
+uint8_t AdminCount = 0;
+//  card UIDs
 
 // FUNCTION DEFINITIONS
 void RC522_Init(SPI_HandleTypeDef *spi) {
     RC522_Handle = spi;
     TM_MFRC522_Init();
 }
+uint8_t Is_Admin_Card(uint8_t *uid) {
+    if (memcmp(uid, AdminUID, 4) == 0) {
+        return 1;
+    }
+    for (int i = 0; i < AdminCount; i++) {
+        if (memcmp(uid, AdminUIDs[i], 4) == 0) {
+            return 1;
+        }
+    }
+    return 0; 
+}
+void Flash_Save_Cards(void) {
+    HAL_FLASH_Unlock(); // Unlock Flash
 
+    // Delete Data on page
+    FLASH_EraseInitTypeDef EraseInitStruct;
+    uint32_t PageError;
+    EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+    EraseInitStruct.PageAddress = FLASH_USER_START_ADDR;
+    EraseInitStruct.NbPages     = 1;
+    HAL_FLASHEx_Erase(&EraseInitStruct, &PageError);
+
+    uint32_t counts = (AdminCount << 8) | CardCount;
+    HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, FLASH_USER_START_ADDR, counts);
+    // Save Admin UIDs
+    for (int i = 0; i < MAX_ADMINS; i++) {
+        uint32_t admin_word = 0xFFFFFFFF; 
+        if (i < AdminCount) {
+            admin_word = (AdminUIDs[i][0] << 24) | (AdminUIDs[i][1] << 16) | 
+                         (AdminUIDs[i][2] << 8)  | AdminUIDs[i][3];
+        }
+        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, FLASH_USER_START_ADDR + 4 + (i * 4), admin_word);
+    }
+    // Save IDCard
+    for (int i = 0; i < CardCount; i++) {
+        uint32_t uid_word = (AuthorizedCards[i][0] << 24) |
+                            (AuthorizedCards[i][1] << 16) |
+                            (AuthorizedCards[i][2] << 8)  |
+                            (AuthorizedCards[i][3]);
+                            
+        // Address update
+        uint32_t write_address = FLASH_USER_START_ADDR + 16 + (i * 4);
+        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, write_address, uid_word);
+    }
+
+    HAL_FLASH_Lock(); // Lock Flash
+}
+void Flash_Load_Cards(void) {
+    uint32_t *flash_ptr = (uint32_t *)FLASH_USER_START_ADDR; 
+    uint32_t counts = flash_ptr[0]; 
+    if (counts == 0xFFFFFFFF) { // Check if Flash is empty
+        CardCount = 0; 
+        AdminCount = 0;
+        return;
+    }
+    CardCount = counts & 0xFF;             
+    AdminCount = (counts >> 8) & 0xFF;
+
+    if (CardCount > MAX_CARDS) CardCount = 0;
+    if (AdminCount > MAX_ADMINS) AdminCount = 0;
+
+    for (int i = 0; i < AdminCount; i++) {
+        uint32_t admin_word = flash_ptr[i + 1];
+        AdminUIDs[i][0] = (admin_word >> 24) & 0xFF;
+        AdminUIDs[i][1] = (admin_word >> 16) & 0xFF;
+        AdminUIDs[i][2] = (admin_word >> 8)  & 0xFF;
+        AdminUIDs[i][3] = admin_word & 0xFF;
+    }
+
+    for (int i = 0; i < CardCount; i++) {
+        uint32_t uid_word = flash_ptr[i + 4];
+        AuthorizedCards[i][0] = (uid_word >> 24) & 0xFF;
+        AuthorizedCards[i][1] = (uid_word >> 16) & 0xFF;
+        AuthorizedCards[i][2] = (uid_word >> 8)  & 0xFF;
+        AuthorizedCards[i][3] = uid_word & 0xFF;
+    }
+}
 UID_Status_t RC522_UID_Add(void) {
-    if(memcmp(CurrentUID, AdminUID, 4) == 0) {
+    if (CardCount >= MAX_CARDS) return UID_INVALID;
+    if(Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN; 
     }
 
-    for (int i = 0; i < MAX_CARDS; i++) {
+    for (int i = 0; i < CardCount; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
             return UID_EXIST; 
         }
     }
 
-    for (int i = 0; i < MAX_CARDS; i++) {
-        if (AuthorizedCards[i][0] == 0x00) {
-            memcpy(AuthorizedCards[i], CurrentUID, 4); 
-            return UID_NEW; 
-        }
-    }
-    return UID_EXIST; 
+    memcpy(AuthorizedCards[CardCount], CurrentUID, 4);
+    CardCount++;
+    Flash_Save_Cards();
+
+    return UID_NEW;
 }
 
 UID_Status_t RC522_UID_Delete(void) {
-    if(memcmp(CurrentUID, AdminUID, 4) == 0) {
+    if(Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN; // Admin card cannot be deleted
     }
-    for (int i = 0; i < MAX_CARDS; i++) {
+    for (int i = 0; i < CardCount; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
-            memset(AuthorizedCards[i], 0x00, 4); 
-            return UID_EXIST;
+            for (int j = i; j < CardCount - 1; j++) {
+                memcpy(AuthorizedCards[j], AuthorizedCards[j + 1], 4);
+            }
+            
+            memset(AuthorizedCards[CardCount - 1], 0x00, 4); 
+            CardCount--;          
+            Flash_Save_Cards();   
+            
+            return UID_EXIST; 
         }
     }
     return UID_NEW; // Card not found
@@ -70,7 +158,7 @@ RC522_Status_t RC522_UID_Detected(void) {
 }
 
 UID_Status_t RC522_UID_Verify(void) {
-    if (memcmp(CurrentUID, AdminUID, 4) == 0) {
+    if (Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN;
     }
     for (int i = 0; i < MAX_CARDS; i++) {
@@ -83,9 +171,35 @@ UID_Status_t RC522_UID_Verify(void) {
     return UID_INVALID;
 }
 
-
 // Nhung ham moi
 UID_Status_t RC522_UID_ChangeAD(void) {
+    if (memcmp(CurrentUID, AdminUID, 4) == 0) {
+        return UID_ADMIN; 
+    }
+    for (int i = 0; i < AdminCount; i++) {
+        if (memcmp(CurrentUID, AdminUIDs[i], 4) == 0) {
+            return UID_EXIST; 
+        }
+    }
+    if (AdminCount >= MAX_ADMINS) {
+        return UID_INVALID; 
+    }
+    for (int i = 0; i < CardCount; i++) {
+        if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
+            for (int j = i; j < CardCount - 1; j++) {
+                memcpy(AuthorizedCards[j], AuthorizedCards[j + 1], 4);
+            }
+            memset(AuthorizedCards[CardCount - 1], 0x00, 4);
+            CardCount--;
+            
+            break; 
+        }
+    }
+
+    memcpy(AdminUIDs[AdminCount], CurrentUID, 4);
+    AdminCount++;           
     
-    return 0;
+    Flash_Save_Cards(); 
+    return UID_NEW; 
 }
+
