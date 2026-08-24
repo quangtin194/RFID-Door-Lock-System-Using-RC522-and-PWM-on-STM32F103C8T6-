@@ -3,13 +3,13 @@
 extern SPI_HandleTypeDef hspi1;
 void TM_MFRC522_Init(void) {
 
-	TM_MFRC522_Reset();   // Delete MFRC522 Ram
+	TM_MFRC522_Reset();
 
-	TM_MFRC522_WriteRegister(MFRC522_REG_T_MODE, 0x8D);     // Bộ chia tần từ 13.56MHz --> 2000 Hz
-	TM_MFRC522_WriteRegister(MFRC522_REG_T_PRESCALER, 0x3E);  // Bit thứ 7 là TAuto dùng để tự động tải lại giá trị của thanh ghi TReload khi bộ đếm thời gian tràn. 
-	TM_MFRC522_WriteRegister(MFRC522_REG_T_RELOAD_L, 30);    // cứ chờ 15ms hoài trong while(1), nếu không có thẻ kẹt ở request     
-	TM_MFRC522_WriteRegister(MFRC522_REG_T_RELOAD_H, 0);	// Thanh ghi TReload là thanh ghi 16 bit, nên cần chia ra 2 thanh ghi 8 bit để lưu trữ giá trị.
-	TM_MFRC522_WriteRegister(MFRC522_REG_RF_CFG, 0x70);   // Tăng độ nhạy của anten
+	TM_MFRC522_WriteRegister(MFRC522_REG_T_MODE, 0x8D);
+	TM_MFRC522_WriteRegister(MFRC522_REG_T_PRESCALER, 0x3E);
+	TM_MFRC522_WriteRegister(MFRC522_REG_T_RELOAD_L, 30);           
+	TM_MFRC522_WriteRegister(MFRC522_REG_T_RELOAD_H, 0);
+	TM_MFRC522_WriteRegister(MFRC522_REG_RF_CFG, 0x70);
 	TM_MFRC522_WriteRegister(MFRC522_REG_TX_AUTO, 0x40);
 	TM_MFRC522_WriteRegister(MFRC522_REG_MODE, 0x3D);
 	TM_MFRC522_AntennaOn();		//Open the antenna
@@ -34,7 +34,7 @@ void TM_MFRC522_WriteRegister(uint8_t addr, uint8_t val) {
     
     HAL_SPI_Transmit(&hspi1, txData, 2, 100);
     
-    MFRC522_CS_LOW;
+    MFRC522_CS_HIGH;
 }
 uint8_t TM_MFRC522_ReadRegister(uint8_t addr) {
     uint8_t txData[2];
@@ -66,7 +66,7 @@ void TM_MFRC522_AntennaOn(void) {
 	uint8_t temp;
 
 	temp = TM_MFRC522_ReadRegister(MFRC522_REG_TX_CONTROL);
-	if (!(temp & 0x03)) {		// nếu 2 bit 0 và 1 = 0 thì chưa bật anten
+	if (!(temp & 0x03)) {
 		TM_MFRC522_SetBitMask(MFRC522_REG_TX_CONTROL, 0x03);
 	}
 }
@@ -88,7 +88,7 @@ TM_MFRC522_Status_t TM_MFRC522_Request(uint8_t reqMode, uint8_t* TagType) {
 	TagType[0] = reqMode;
 	status = TM_MFRC522_ToCard(PCD_TRANSCEIVE, TagType, 1, TagType, &backBits);
 
-	if ((status != MI_OK) || (backBits != 0x10)) {     // backbits = 0x10, ám chỉ có 16 bit được trả về vì kiểu giao tiếp này sẽ trả về 16 bit nếu có thẻ giao tiếp
+	if ((status != MI_OK) || (backBits != 0x10)) {    
 		status = MI_ERR;
 	}
 
@@ -118,21 +118,21 @@ TM_MFRC522_Status_t TM_MFRC522_ToCard(uint8_t command, uint8_t* sendData, uint8_
 			break;
 	}
 
-	TM_MFRC522_WriteRegister(MFRC522_REG_COMM_IE_N, irqEn | 0x80); // thanh ghi cho phép ngắt
-	TM_MFRC522_ClearBitMask(MFRC522_REG_COMM_IRQ, 0x80);  // Clear all interrupt request bits
-	TM_MFRC522_SetBitMask(MFRC522_REG_FIFO_LEVEL, 0x80); // Xóa bộ nhớ, bit 7 bật lên thì chip tự xóa
+	TM_MFRC522_WriteRegister(MFRC522_REG_COMM_IE_N, irqEn | 0x80);
+	TM_MFRC522_ClearBitMask(MFRC522_REG_COMM_IRQ, 0x80);
+	TM_MFRC522_SetBitMask(MFRC522_REG_FIFO_LEVEL, 0x80);
 
 	TM_MFRC522_WriteRegister(MFRC522_REG_COMMAND, PCD_IDLE);
 
 	//Writing data to the FIFO
 	for (i = 0; i < sendLen; i++) {   
-		TM_MFRC522_WriteRegister(MFRC522_REG_FIFO_DATA, sendData[i]);    // Lấy mã lệnh gửi vào FIFO
+		TM_MFRC522_WriteRegister(MFRC522_REG_FIFO_DATA, sendData[i]);    
 	}
 
 	//Execute the command
 	TM_MFRC522_WriteRegister(MFRC522_REG_COMMAND, command);
 	if (command == PCD_TRANSCEIVE) {    
-		TM_MFRC522_SetBitMask(MFRC522_REG_BIT_FRAMING, 0x80);		//Bật start send
+		TM_MFRC522_SetBitMask(MFRC522_REG_BIT_FRAMING, 0x80);		//StartSend=1,transmission of data starts  
 	}   
 
 	//Waiting to receive data to complete
@@ -142,20 +142,20 @@ TM_MFRC522_Status_t TM_MFRC522_ToCard(uint8_t command, uint8_t* sendData, uint8_
 		//Set1 TxIRq RxIRq IdleIRq HiAlerIRq LoAlertIRq ErrIRq TimerIRq
 		n = TM_MFRC522_ReadRegister(MFRC522_REG_COMM_IRQ);
 		i--;
-	} while ((i!=0) && !(n&0x01) && !(n&waitIRq)); // n&0x01 kiểm tra bit 0 của thanh ghi IRQ có bật không.
-// dùng do while để kiểm tra ngay từ lần đầu
-	TM_MFRC522_ClearBitMask(MFRC522_REG_BIT_FRAMING, 0x80);	  // dừng start send		//StartSend=0
+	} while ((i!=0) && !(n&0x01) && !(n&waitIRq));
+
+	TM_MFRC522_ClearBitMask(MFRC522_REG_BIT_FRAMING, 0x80);			//StartSend=0
 
 	if (i != 0)  {
-		if (!(TM_MFRC522_ReadRegister(MFRC522_REG_ERROR) & 0x1B)) {  // 0x1B = 00011011b, kiểm tra có lỗi không.
+		if (!(TM_MFRC522_ReadRegister(MFRC522_REG_ERROR) & 0x1B)) {
 			status = MI_OK;
-			if (n & irqEn & 0x01) {    // Kiểm tra lỗi không tìm thấy thẻ
+			if (n & irqEn & 0x01) {   
 				status = MI_NOTAGERR;			
 			}
 
 			if (command == PCD_TRANSCEIVE) {
-				n = TM_MFRC522_ReadRegister(MFRC522_REG_FIFO_LEVEL); // đọc lượng bit trả về
-				lastBits = TM_MFRC522_ReadRegister(MFRC522_REG_CONTROL) & 0x07;   // Lấy 3 bit cuối cùneg
+				n = TM_MFRC522_ReadRegister(MFRC522_REG_FIFO_LEVEL);
+				lastBits = TM_MFRC522_ReadRegister(MFRC522_REG_CONTROL) & 0x07;
 				if (lastBits) {   
 					*backLen = (n - 1) * 8 + lastBits;   
 				} else {   
@@ -165,7 +165,7 @@ TM_MFRC522_Status_t TM_MFRC522_ToCard(uint8_t command, uint8_t* sendData, uint8_
 				if (n == 0) {   
 					n = 1;    
 				}
-				if (n > MFRC522_MAX_LEN) {   // tránh đọc quá vùng nhớ, 
+				if (n > MFRC522_MAX_LEN) {   
 					n = MFRC522_MAX_LEN;   
 				}
 
