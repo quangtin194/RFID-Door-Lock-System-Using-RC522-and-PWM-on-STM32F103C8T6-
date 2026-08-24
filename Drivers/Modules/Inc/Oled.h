@@ -29,7 +29,13 @@ typedef enum {
     OLED_MSG_ADMIN_CARD,
     OLED_MSG_SCAN_ADD_CARD,
     OLED_MSG_SCAN_DELETE_CARD,
-    OLED_MSG_ERROR
+    OLED_MSG_ERROR,
+
+    OLED_MSG_PASSWORD_INPUT,
+    OLED_MSG_LOCKED, 
+    OLED_MSG_SCAN_NEW_ADMIN, 
+    OLED_MSG_ADMIN_CHANGED,
+    OLED_MSG_ADMIN_CHANGE_DENIED
 } Oled_Msg_t;
 
 
@@ -38,5 +44,8 @@ void Oled_Init(I2C_HandleTypeDef *hi2c);
 void Oled_Clear(void);
 
 void Oled_ShowStatus(Oled_Msg_t msg); // thay Oled_Display()
+
+// Nhung ham moi
+void Oled_ShowPasswordMask(uint8_t length);   //  Xuat ra chuoi ****
 
 #endif
