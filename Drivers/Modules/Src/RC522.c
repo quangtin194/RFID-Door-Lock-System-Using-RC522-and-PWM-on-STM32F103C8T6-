@@ -34,7 +34,7 @@ uint8_t Is_Admin_Card(uint8_t *uid) {
 }
 void Flash_Save_Cards(void) {
     HAL_FLASH_Unlock(); // Unlock Flash
-
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPERR);
     // Delete Data on page
     FLASH_EraseInitTypeDef EraseInitStruct;
     uint32_t PageError;
@@ -69,6 +69,8 @@ void Flash_Save_Cards(void) {
     HAL_FLASH_Lock(); // Lock Flash
 }
 void Flash_Load_Cards(void) {
+    memset(AuthorizedCards, 0x00, sizeof(AuthorizedCards));
+    memset(AdminUIDs, 0x00, sizeof(AdminUIDs));
     uint32_t *flash_ptr = (uint32_t *)FLASH_USER_START_ADDR; 
     uint32_t counts = flash_ptr[0]; 
     if (counts == 0xFFFFFFFF) { // Check if Flash is empty
@@ -172,7 +174,7 @@ UID_Status_t RC522_UID_Verify(void) {
 }
 
 // Nhung ham moi
-UID_Status_t RC522_UID_ChangeAD(void) {
+UID_Status_t RC522_UID_AddAD(void) {
     if (memcmp(CurrentUID, AdminUID, 4) == 0) {
         return UID_ADMIN; 
     }

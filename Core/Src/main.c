@@ -114,6 +114,8 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_Delay(100);
+  Flash_Load_Cards();
   App_Init(&keypad ,&buzzer, &huart1, &hi2c1, &hspi1, &servo);
 
   /* USER CODE END 2 */
