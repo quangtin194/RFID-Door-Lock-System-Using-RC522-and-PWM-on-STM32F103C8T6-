@@ -53,13 +53,11 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Servo.c
     D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/UART.c
     D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Keypad.c
-
-    
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Inc
 )
 
 # Add project symbols (macros)

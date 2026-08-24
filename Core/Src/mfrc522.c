@@ -34,7 +34,7 @@ void TM_MFRC522_WriteRegister(uint8_t addr, uint8_t val) {
     
     HAL_SPI_Transmit(&hspi1, txData, 2, 100);
     
-    MFRC522_CS_LOW;
+    MFRC522_CS_HIGH;
 }
 uint8_t TM_MFRC522_ReadRegister(uint8_t addr) {
     uint8_t txData[2];
