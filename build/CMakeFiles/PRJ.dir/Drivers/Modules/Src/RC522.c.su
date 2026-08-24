@@ -1,9 +1,0 @@
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:20:6:RC522_Init	16	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:24:9:Is_Admin_Card	24	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:35:6:Flash_Save_Cards	80	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:71:6:Flash_Load_Cards	32	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:103:14:RC522_UID_Add	16	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:122:14:RC522_UID_Delete	16	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:142:16:RC522_UID_Detected	16	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:162:14:RC522_UID_Verify	16	static
-C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Drivers/Modules/Src/RC522.c:177:14:RC522_UID_AddAD	24	static
