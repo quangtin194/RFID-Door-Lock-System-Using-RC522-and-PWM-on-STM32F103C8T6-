@@ -405,14 +405,6 @@ void App_Run(void) {
         default:
             break;
     }
-<<<<<<< HEAD
-=======
-
-    // Da xu ly phim xong -> reset de khong xu ly lap lai trong vong lap tiep theo
-    key = KEY_NONE;
-}
-
->>>>>>> f8e46b1c0b53cc08b60c7a3038903fc4de54fee1
 
     // Da xu ly phim xong -> reset de khong xu ly lap lai trong vong lap tiep theo
     key = KEY_NONE;
