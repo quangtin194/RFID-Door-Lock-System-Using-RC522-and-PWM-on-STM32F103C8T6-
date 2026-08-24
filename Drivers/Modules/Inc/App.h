@@ -18,6 +18,7 @@
 #define MAX_DENY 3
 #define LOCK 3000
 
+
 // ENUM DEFINITIONS
 typedef enum {
     IDLE,
@@ -39,12 +40,6 @@ typedef enum {
     ADMIN_CHANGE_DENIED,
     LOCKED
 
-} AppState_t;
-
-// FUNCTION PROTOTYPES
-void App_Init()
-{
-    Keypad_t *keypad,
 } AppState_t;
 
 // FUNCTION PROTOTYPES

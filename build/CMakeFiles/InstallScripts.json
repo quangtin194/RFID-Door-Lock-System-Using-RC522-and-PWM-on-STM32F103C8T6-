@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"D:/DOCUMENT/CodeFile/F4BK/PRJ/build/cmake_install.cmake",
-		"D:/DOCUMENT/CodeFile/F4BK/PRJ/build/cmake/stm32cubemx/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
