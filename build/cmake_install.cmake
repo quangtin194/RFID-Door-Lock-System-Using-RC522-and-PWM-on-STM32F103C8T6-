@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update
+# Install script for directory: D:/DOCUMENT/CodeFile/F4BK/PRJ
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,18 +34,18 @@ endif()
 
 # Set path to fallback-tool for dependency-resolution.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/arm-none-eabi-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/14.2 rel1/bin/arm-none-eabi-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/build/cmake/stm32cubemx/cmake_install.cmake")
+  include("D:/DOCUMENT/CodeFile/F4BK/PRJ/build/cmake/stm32cubemx/cmake_install.cmake")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/build/install_local_manifest.txt"
+  file(WRITE "D:/DOCUMENT/CodeFile/F4BK/PRJ/build/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -61,6 +61,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "D:/DOCUMENT/CodeFile/F4BK/PRJ/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

@@ -28,7 +28,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         GPIO_Pin == Keypad_Handle.Col3_Pin)
     {
         keypad_event = 1;
-=======
+    }
+}
 static volatile uint8_t keypad_event;
 
 // XU LY NGAT EXTI

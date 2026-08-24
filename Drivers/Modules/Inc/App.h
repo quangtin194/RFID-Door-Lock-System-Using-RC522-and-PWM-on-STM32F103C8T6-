@@ -42,15 +42,9 @@ typedef enum {
 } AppState_t;
 
 // FUNCTION PROTOTYPES
-void App_Init(
+void App_Init()
+{
     Keypad_t *keypad,
-
-    PASSWORD_INPUT,
-    CHANGE_ADMIN_CARD,
-    ADMIN_CHANGED,
-    ADMIN_CHANGE_DENIED,
-    LOCKED
-
 } AppState_t;
 
 // FUNCTION PROTOTYPES

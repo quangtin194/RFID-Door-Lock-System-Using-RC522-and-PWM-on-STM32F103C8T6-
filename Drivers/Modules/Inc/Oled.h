@@ -53,5 +53,4 @@ void Oled_ShowLockCountdown(uint32_t seconds); // Hien "Secure!" + thoi gian dem
 // Nhung ham moi
 void Oled_ShowPasswordMask(uint8_t length);   //  Xuat ra chuoi ****
 
->>>>>>> QuangTin_update
 #endif
