@@ -401,7 +401,7 @@ void App_Run(void) {
                 if (rc522Status == RC522_OK) 
                 {
                     uidStatus = RC522_UID_DelAD();
-                    if (uidStatus == UID_NEW) appState = ADMIN_DELETED;
+                    if (uidStatus == UID_EXIST) appState = ADMIN_DELETED;
                     else appState = ADMIN_CHANGE_DENIED; 
                 }
                 else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
