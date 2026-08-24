@@ -205,3 +205,4 @@ UID_Status_t RC522_UID_AddAD(void) {
     return UID_NEW; 
 }
 
+// new
