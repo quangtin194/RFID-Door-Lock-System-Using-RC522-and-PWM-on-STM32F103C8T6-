@@ -258,6 +258,41 @@ void Oled_ShowStatus(Oled_Msg_t msg)
 
 // Nhung ham moi
 void Oled_ShowPasswordMask(uint8_t length) {
-    
+    char mask[9]; // Toi da 8 ky tu mat khau
+    if (length > 8) length = 8;
+
+    for (uint8_t i = 0; i < length; i++) {
+        mask[i] = '*';
+    }
+    mask[length] = '\0';
+
+    Oled_ShowLines(mask, 2, NULL, 0);
+}
+
+static void Oled_UintToStr(uint32_t value, char *buf)
+{
+    char tmp[11];
+    uint8_t len = 0;
+
+    if (value == 0) {
+        tmp[len++] = '0';
+    } else {
+        while (value > 0 && len < 10) {
+            tmp[len++] = (char)('0' + (value % 10));
+            value /= 10;
+        }
+    }
+
+    uint8_t i = 0;
+    while (len > 0) {
+        buf[i++] = tmp[--len];
+    }
+    buf[i] = '\0';
+}
+
+void Oled_ShowLockCountdown(uint32_t seconds) {
+    char secStr[12];
+    Oled_UintToStr(seconds, secStr);
+    Oled_ShowLines("Secure!", 2, secStr, 2);
 }
 

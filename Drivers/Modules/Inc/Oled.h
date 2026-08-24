@@ -47,5 +47,6 @@ void Oled_ShowStatus(Oled_Msg_t msg); // thay Oled_Display()
 
 // Nhung ham moi
 void Oled_ShowPasswordMask(uint8_t length);   //  Xuat ra chuoi ****
+void Oled_ShowLockCountdown(uint32_t seconds); // Hien "Secure!" + thoi gian dem nguoc (giay)
 
 #endif
