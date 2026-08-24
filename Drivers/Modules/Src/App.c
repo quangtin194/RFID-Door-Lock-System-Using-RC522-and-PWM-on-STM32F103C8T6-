@@ -340,7 +340,6 @@ void App_Run(void) {
                     else appState = CARD_ADDED;
                 }
                 else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-                Timeout_counter = HAL_GetTick();
             }
             break;
 
@@ -356,7 +355,6 @@ void App_Run(void) {
                     else appState = DELETE_DENIED;
                 }
                 else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-                Timeout_counter = HAL_GetTick();
             }
             break;
 
