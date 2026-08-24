@@ -365,7 +365,7 @@ void App_Run(void) {
                 rc522Status = RC522_UID_Detected();
                 if (rc522Status == RC522_OK) 
                 {
-                    uidStatus = RC522_UID_ChangeAD();
+                    uidStatus = RC522_UID_AddAD();
                     if (uidStatus == UID_NEW) appState = ADMIN_CHANGED;
                     else appState = ADMIN_CHANGE_DENIED; 
                 }
@@ -405,9 +405,15 @@ void App_Run(void) {
         default:
             break;
     }
+<<<<<<< HEAD
+=======
 
     // Da xu ly phim xong -> reset de khong xu ly lap lai trong vong lap tiep theo
     key = KEY_NONE;
 }
 
+>>>>>>> f8e46b1c0b53cc08b60c7a3038903fc4de54fee1
 
+    // Da xu ly phim xong -> reset de khong xu ly lap lai trong vong lap tiep theo
+    key = KEY_NONE;
+}

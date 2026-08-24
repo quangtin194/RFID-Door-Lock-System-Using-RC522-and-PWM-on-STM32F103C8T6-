@@ -44,15 +44,15 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Core/Src/mfrc522.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/App.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Buzzer.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Button.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Oled.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/RC522.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Servo.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/UART.c
-    D:/DOCUMENT/CodeFile/F4BK/PRJ/Drivers/Modules/Src/Keypad.c
+    Core/Src/mfrc522.c
+    Drivers/Modules/Src/App.c
+    Drivers/Modules/Src/Buzzer.c
+    Drivers/Modules/Src/Button.c
+    Drivers/Modules/Src/Oled.c
+    Drivers/Modules/Src/RC522.c
+    Drivers/Modules/Src/Servo.c
+    Drivers/Modules/Src/UART.c
+    Drivers/Modules/Src/Keypad.c
 )
 
 # Add include paths
