@@ -14,7 +14,7 @@
 #define OPEN_ANGLE 90
 #define TIMEOUT_S_WAIT 1000    // Short wait
 #define TIMEOUT_L_WAIT 5000    // Long wait
-#define SPAM_TIME 10000 
+#define SPAM_TIME 10000
 #define MAX_DENY 3
 #define LOCK 3000
 

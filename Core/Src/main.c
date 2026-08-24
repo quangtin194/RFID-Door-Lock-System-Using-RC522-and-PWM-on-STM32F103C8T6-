@@ -51,7 +51,6 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 Servo_t servo = {&htim2, TIM_CHANNEL_1};
 Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
-
 Keypad_t keypad = {
     // Cot (Columns) - PB12, PB13, PB14: input pull-up, EXTI falling
     .Col1_Port = GPIOB, .Col2_Port = GPIOB, .Col3_Port = GPIOB,
@@ -61,7 +60,6 @@ Keypad_t keypad = {
     .Row1_Port = GPIOB, .Row2_Port = GPIOB, .Row3_Port = GPIOB, .Row4_Port = GPIOB,
     .Row1_Pin  = GPIO_PIN_8, .Row2_Pin = GPIO_PIN_9, .Row3_Pin = GPIO_PIN_10, .Row4_Pin = GPIO_PIN_11,
 };
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,8 +112,6 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(100);
-  Flash_Load_Cards();
   App_Init(&keypad ,&buzzer, &huart1, &hi2c1, &hspi1, &servo);
 
   /* USER CODE END 2 */
@@ -382,11 +378,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-
   /*Configure GPIO pins : PB12 PB13 PB14 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 

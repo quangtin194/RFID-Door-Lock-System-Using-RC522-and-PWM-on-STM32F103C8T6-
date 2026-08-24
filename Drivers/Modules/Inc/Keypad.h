@@ -61,3 +61,4 @@ uint8_t Keypad_Password_Verify(void);   // Check password, tra ve 0 (sai) hoac 1
 void Keypad_Password_Reset(void);          
 
 #endif
+
