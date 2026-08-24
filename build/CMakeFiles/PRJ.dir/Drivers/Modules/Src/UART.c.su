@@ -1,0 +1,3 @@
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Drivers/Modules/Src/UART.c:11:6:UART_Init	16	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Drivers/Modules/Src/UART.c:15:6:UART_PC_Print	24	static
+C:/Users/DELL/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6--QuangTin_update/Drivers/Modules/Src/UART.c:21:6:UART_Print_UID	160	static

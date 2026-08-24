@@ -3936,7 +3936,7 @@ LOAD c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb
                 0x08000000                g_pfnVectors
                 0x0800010c                        . = ALIGN (0x4)
 
-.text           0x0800010c     0x6c68
+.text           0x0800010c     0x6c70
                 0x0800010c                        . = ALIGN (0x4)
  *(.text)
  .text          0x0800010c       0x10 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-strlen.o)
@@ -4431,186 +4431,186 @@ LOAD c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb
                 0x08006034       0x14 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
                 0x08006034                Keypad_DisableEXTI
  .text.Keypad_Scan
-                0x08006048      0x230 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x08006048      0x238 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
                 0x08006048                Keypad_Scan
  .text.Keypad_Password_Append
-                0x08006278       0x50 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
-                0x08006278                Keypad_Password_Append
+                0x08006280       0x50 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x08006280                Keypad_Password_Append
  .text.Keypad_Password_Del
-                0x080062c8       0x34 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
-                0x080062c8                Keypad_Password_Del
+                0x080062d0       0x34 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x080062d0                Keypad_Password_Del
  .text.Keypad_Password_GetLength
-                0x080062fc       0x14 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
-                0x080062fc                Keypad_Password_GetLength
+                0x08006304       0x14 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x08006304                Keypad_Password_GetLength
  .text.Keypad_Password_Verify
-                0x08006310       0x50 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
-                0x08006310                Keypad_Password_Verify
+                0x08006318       0x50 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x08006318                Keypad_Password_Verify
  .text.Keypad_Password_Reset
-                0x08006360       0x3c CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
-                0x08006360                Keypad_Password_Reset
+                0x08006368       0x3c CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x08006368                Keypad_Password_Reset
  .text.snprintf
-                0x0800639c       0x68 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-snprintf.o)
-                0x0800639c                sniprintf
-                0x0800639c                snprintf
- .text.memcmp   0x08006404       0x20 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memcmp.o)
-                0x08006404                memcmp
- .text.memset   0x08006424       0x10 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memset.o)
-                0x08006424                memset
- .text.__errno  0x08006434        0xc c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-errno.o)
-                0x08006434                __errno
+                0x080063a4       0x68 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-snprintf.o)
+                0x080063a4                sniprintf
+                0x080063a4                snprintf
+ .text.memcmp   0x0800640c       0x20 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memcmp.o)
+                0x0800640c                memcmp
+ .text.memset   0x0800642c       0x10 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memset.o)
+                0x0800642c                memset
+ .text.__errno  0x0800643c        0xc c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-errno.o)
+                0x0800643c                __errno
  .text.__libc_init_array
-                0x08006440       0x48 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-init.o)
-                0x08006440                __libc_init_array
+                0x08006448       0x48 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-init.o)
+                0x08006448                __libc_init_array
  .text.__retarget_lock_acquire_recursive
-                0x08006488        0x2 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-lock.o)
-                0x08006488                __retarget_lock_acquire_recursive
+                0x08006490        0x2 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-lock.o)
+                0x08006490                __retarget_lock_acquire_recursive
  .text.__retarget_lock_release_recursive
-                0x0800648a        0x2 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-lock.o)
-                0x0800648a                __retarget_lock_release_recursive
- .text._free_r  0x0800648c       0x90 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-freer.o)
-                0x0800648c                _free_r
+                0x08006492        0x2 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-lock.o)
+                0x08006492                __retarget_lock_release_recursive
+ .text._free_r  0x08006494       0x90 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-freer.o)
+                0x08006494                _free_r
  .text.sbrk_aligned
-                0x0800651c       0x44 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mallocr.o)
+                0x08006524       0x44 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mallocr.o)
  .text._malloc_r
-                0x08006560      0x100 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mallocr.o)
-                0x08006560                _malloc_r
+                0x08006568      0x100 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mallocr.o)
+                0x08006568                _malloc_r
  .text.__malloc_lock
-                0x08006660        0xc c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mlock.o)
-                0x08006660                __malloc_lock
+                0x08006668        0xc c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mlock.o)
+                0x08006668                __malloc_lock
  .text.__malloc_unlock
-                0x0800666c        0xc c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mlock.o)
-                0x0800666c                __malloc_unlock
+                0x08006674        0xc c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-mlock.o)
+                0x08006674                __malloc_unlock
  .text.__ssputs_r
-                0x08006678       0xb6 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-svfprintf.o)
-                0x08006678                __ssputs_r
- *fill*         0x0800672e        0x2 
+                0x08006680       0xb6 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-svfprintf.o)
+                0x08006680                __ssputs_r
+ *fill*         0x08006736        0x2 
  .text._svfprintf_r
-                0x08006730      0x1f8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-svfprintf.o)
-                0x08006730                _svfiprintf_r
-                0x08006730                _svfprintf_r
+                0x08006738      0x1f8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-svfprintf.o)
+                0x08006738                _svfiprintf_r
+                0x08006738                _svfprintf_r
  .text._printf_common
-                0x08006928       0xe4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-vfprintf_i.o)
-                0x08006928                _printf_common
+                0x08006930       0xe4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-vfprintf_i.o)
+                0x08006930                _printf_common
  .text._printf_i
-                0x08006a0c      0x258 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-vfprintf_i.o)
-                0x08006a0c                _printf_i
- .text.memmove  0x08006c64       0x34 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memmove.o)
-                0x08006c64                memmove
- .text._sbrk_r  0x08006c98       0x20 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-sbrkr.o)
-                0x08006c98                _sbrk_r
- .text.memchr   0x08006cb8       0x1c c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memchr-stub.o)
-                0x08006cb8                memchr
- .text.memcpy   0x08006cd4       0x1c c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memcpy-stub.o)
-                0x08006cd4                memcpy
+                0x08006a14      0x258 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-vfprintf_i.o)
+                0x08006a14                _printf_i
+ .text.memmove  0x08006c6c       0x34 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memmove.o)
+                0x08006c6c                memmove
+ .text._sbrk_r  0x08006ca0       0x20 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-sbrkr.o)
+                0x08006ca0                _sbrk_r
+ .text.memchr   0x08006cc0       0x1c c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memchr-stub.o)
+                0x08006cc0                memchr
+ .text.memcpy   0x08006cdc       0x1c c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-memcpy-stub.o)
+                0x08006cdc                memcpy
  .text._realloc_r
-                0x08006cf0       0x5c c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-reallocr.o)
-                0x08006cf0                _realloc_r
+                0x08006cf8       0x5c c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-reallocr.o)
+                0x08006cf8                _realloc_r
  .text._malloc_usable_size_r
-                0x08006d4c       0x10 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-msizer.o)
-                0x08006d4c                _malloc_usable_size_r
+                0x08006d54       0x10 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-msizer.o)
+                0x08006d54                _malloc_usable_size_r
  *(.glue_7)
- .glue_7        0x08006d5c        0x0 linker stubs
+ .glue_7        0x08006d64        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x08006d5c        0x0 linker stubs
+ .glue_7t       0x08006d64        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x08006d5c        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
+ .eh_frame      0x08006d64        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
  *(.init)
- .init          0x08006d5c        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crti.o
-                0x08006d5c                _init
- .init          0x08006d60        0x8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtn.o
+ .init          0x08006d64        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crti.o
+                0x08006d64                _init
+ .init          0x08006d68        0x8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtn.o
  *(.fini)
- .fini          0x08006d68        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crti.o
-                0x08006d68                _fini
- .fini          0x08006d6c        0x8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtn.o
-                0x08006d74                        . = ALIGN (0x4)
-                0x08006d74                        _etext = .
+ .fini          0x08006d70        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crti.o
+                0x08006d70                _fini
+ .fini          0x08006d74        0x8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtn.o
+                0x08006d7c                        . = ALIGN (0x4)
+                0x08006d7c                        _etext = .
 
-.vfp11_veneer   0x08006d74        0x0
- .vfp11_veneer  0x08006d74        0x0 linker stubs
+.vfp11_veneer   0x08006d7c        0x0
+ .vfp11_veneer  0x08006d7c        0x0 linker stubs
 
-.v4_bx          0x08006d74        0x0
- .v4_bx         0x08006d74        0x0 linker stubs
+.v4_bx          0x08006d7c        0x0
+ .v4_bx         0x08006d7c        0x0 linker stubs
 
-.iplt           0x08006d74        0x0
- .iplt          0x08006d74        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
+.iplt           0x08006d7c        0x0
+ .iplt          0x08006d7c        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
 
-.rodata         0x08006d74      0x364
-                0x08006d74                        . = ALIGN (0x4)
+.rodata         0x08006d7c      0x364
+                0x08006d7c                        . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x08006d74      0x107 CMakeFiles/PRJ.dir/Drivers/Modules/Src/App.c.obj
- *fill*         0x08006e7b        0x1 
- .rodata        0x08006e7c       0xca CMakeFiles/PRJ.dir/Drivers/Modules/Src/Oled.c.obj
- *fill*         0x08006f46        0x2 
- .rodata        0x08006f48       0x19 CMakeFiles/PRJ.dir/Drivers/Modules/Src/UART.c.obj
- *fill*         0x08006f61        0x3 
- .rodata        0x08006f64        0xc CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+ .rodata        0x08006d7c      0x107 CMakeFiles/PRJ.dir/Drivers/Modules/Src/App.c.obj
+ *fill*         0x08006e83        0x1 
+ .rodata        0x08006e84       0xca CMakeFiles/PRJ.dir/Drivers/Modules/Src/Oled.c.obj
+ *fill*         0x08006f4e        0x2 
+ .rodata        0x08006f50       0x19 CMakeFiles/PRJ.dir/Drivers/Modules/Src/UART.c.obj
+ *fill*         0x08006f69        0x3 
+ .rodata        0x08006f6c        0xc CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
  *(.rodata*)
  .rodata.AHBPrescTable
-                0x08006f70       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
-                0x08006f70                AHBPrescTable
+                0x08006f78       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
+                0x08006f78                AHBPrescTable
  .rodata.APBPrescTable
-                0x08006f80        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
-                0x08006f80                APBPrescTable
+                0x08006f88        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
+                0x08006f88                APBPrescTable
  .rodata.aPLLMULFactorTable.1
-                0x08006f88       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
+                0x08006f90       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
  .rodata.aPredivFactorTable.0
-                0x08006f98        0x2 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
- *fill*         0x08006f9a        0x2 
+                0x08006fa0        0x2 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
+ *fill*         0x08006fa2        0x2 
  .rodata.Oled_Font
-                0x08006f9c      0x102 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Oled.c.obj
- *fill*         0x0800709e        0x2 
+                0x08006fa4      0x102 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Oled.c.obj
+ *fill*         0x080070a6        0x2 
  .rodata.Password_Store
-                0x080070a0        0x4 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+                0x080070a8        0x4 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
  .rodata._svfprintf_r.str1.1
-                0x080070a4       0x11 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-svfprintf.o)
+                0x080070ac       0x11 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-svfprintf.o)
  .rodata._printf_i.str1.1
-                0x080070b5       0x22 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-vfprintf_i.o)
-                0x080070d8                        . = ALIGN (0x4)
- *fill*         0x080070d7        0x1 
+                0x080070bd       0x22 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-nano-vfprintf_i.o)
+                0x080070e0                        . = ALIGN (0x4)
+ *fill*         0x080070df        0x1 
 
-.ARM.extab      0x080070d8        0x0
-                0x080070d8                        . = ALIGN (0x4)
+.ARM.extab      0x080070e0        0x0
+                0x080070e0                        . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x080070d8                        . = ALIGN (0x4)
+                0x080070e0                        . = ALIGN (0x4)
 
-.ARM            0x080070d8        0x8
-                0x080070d8                        . = ALIGN (0x4)
-                0x080070d8                        __exidx_start = .
+.ARM            0x080070e0        0x8
+                0x080070e0                        . = ALIGN (0x4)
+                0x080070e0                        __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x080070d8        0x8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-strlen.o)
-                0x080070e0                        __exidx_end = .
-                0x080070e0                        . = ALIGN (0x4)
+ .ARM.exidx     0x080070e0        0x8 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp\libg_nano.a(libc_a-strlen.o)
+                0x080070e8                        __exidx_end = .
+                0x080070e8                        . = ALIGN (0x4)
 
-.preinit_array  0x080070e0        0x0
-                0x080070e0                        . = ALIGN (0x4)
-                0x080070e0                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x080070e8        0x0
+                0x080070e8                        . = ALIGN (0x4)
+                0x080070e8                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x080070e0                        PROVIDE (__preinit_array_end = .)
-                0x080070e0                        . = ALIGN (0x4)
+                0x080070e8                        PROVIDE (__preinit_array_end = .)
+                0x080070e8                        . = ALIGN (0x4)
 
-.init_array     0x080070e0        0x4
-                0x080070e0                        . = ALIGN (0x4)
-                0x080070e0                        PROVIDE (__init_array_start = .)
+.init_array     0x080070e8        0x4
+                0x080070e8                        . = ALIGN (0x4)
+                0x080070e8                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x080070e0        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
-                0x080070e4                        PROVIDE (__init_array_end = .)
-                0x080070e4                        . = ALIGN (0x4)
+ .init_array    0x080070e8        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
+                0x080070ec                        PROVIDE (__init_array_end = .)
+                0x080070ec                        . = ALIGN (0x4)
 
-.fini_array     0x080070e4        0x4
-                0x080070e4                        . = ALIGN (0x4)
+.fini_array     0x080070ec        0x4
+                0x080070ec                        . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x080070e4        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
+ .fini_array    0x080070ec        0x4 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x080070e8                        . = ALIGN (0x4)
-                0x080070e8                        _sidata = LOADADDR (.data)
+                0x080070f0                        . = ALIGN (0x4)
+                0x080070f0                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x080070e8        0x0
- .rel.iplt      0x080070e8        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
+.rel.dyn        0x080070f0        0x0
+ .rel.iplt      0x080070f0        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
 
-.data           0x20000000       0xa0 load address 0x080070e8
+.data           0x20000000       0xa0 load address 0x080070f0
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -4645,16 +4645,16 @@ LOAD c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb
                 0x200000a0                        . = ALIGN (0x4)
 
 .tm_clone_table
-                0x200000a0        0x0 load address 0x08007188
+                0x200000a0        0x0 load address 0x08007190
  .tm_clone_table
                 0x200000a0        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
  .tm_clone_table
                 0x200000a0        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtend.o
 
-.igot.plt       0x200000a0        0x0 load address 0x08007188
+.igot.plt       0x200000a0        0x0 load address 0x08007190
  .igot.plt      0x200000a0        0x0 c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7-m/nofp/crtbegin.o
 
-.tdata          0x200000a0        0x0 load address 0x08007188
+.tdata          0x200000a0        0x0 load address 0x08007190
  *(.tdata .tdata.* .gnu.linkonce.td.*)
                 0x200000a0                        . = ALIGN (0x4)
                 0x200000a0                        _edata = .
@@ -4671,7 +4671,7 @@ LOAD c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb
                 [!provide]                        PROVIDE (__data_source_end = __tdata_source_end)
                 [!provide]                        PROVIDE (__data_source_size = (__data_source_end - __data_source))
 
-.tbss           0x200000a0        0x0 load address 0x08007188
+.tbss           0x200000a0        0x0 load address 0x08007190
                 0x200000a0                        _sbss = .
                 0x200000a0                        __bss_start__ = _sbss
  *(.tbss .tbss.*)
@@ -4688,7 +4688,7 @@ LOAD c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb
                 [!provide]                        PROVIDE (__arm32_tls_tcb_offset = MAX (0x8, __tls_align))
                 [!provide]                        PROVIDE (__arm64_tls_tcb_offset = MAX (0x10, __tls_align))
 
-.bss            0x200000a0      0x72c load address 0x08007188
+.bss            0x200000a0      0x72c load address 0x08007190
  *(.bss)
  *(.bss*)
  .bss.completed.1
@@ -4783,7 +4783,7 @@ LOAD c:/progra~2/armgnu~1/12977f~1.2mp/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb
                 [!provide]                        PROVIDE (__bss_size = (__bss_end - __bss_start))
 
 ._user_heap_stack
-                0x200007cc      0x604 load address 0x08007188
+                0x200007cc      0x604 load address 0x08007190
                 0x200007d0                        . = ALIGN (0x8)
  *fill*         0x200007cc        0x4 
                 [!provide]                        PROVIDE (end = .)
@@ -5173,7 +5173,7 @@ LOAD linker stubs
  .debug_macro   0x00019820      0x1d0 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
  .debug_macro   0x000199f0       0x10 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
 
-.debug_line     0x00000000    0x17b39
+.debug_line     0x00000000    0x17b3a
  .debug_line    0x00000000      0x758 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
  .debug_line    0x00000758     0x3c22 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c.obj
  .debug_line    0x0000437a      0x985 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c.obj
@@ -5197,7 +5197,7 @@ LOAD linker stubs
  .debug_line    0x000157fd      0x95b CMakeFiles/PRJ.dir/Drivers/Modules/Src/RC522.c.obj
  .debug_line    0x00016158      0x7b2 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Servo.c.obj
  .debug_line    0x0001690a      0x889 CMakeFiles/PRJ.dir/Drivers/Modules/Src/UART.c.obj
- .debug_line    0x00017193      0x9a6 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
+ .debug_line    0x00017193      0x9a7 CMakeFiles/PRJ.dir/Drivers/Modules/Src/Keypad.c.obj
 
 .debug_str      0x00000000    0x8fedd
  .debug_str     0x00000000    0x861cd cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
