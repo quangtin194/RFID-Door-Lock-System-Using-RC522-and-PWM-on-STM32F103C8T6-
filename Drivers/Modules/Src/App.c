@@ -296,6 +296,7 @@ void App_Run(void) {
         case LOCKED:
             if (HAL_GetTick() - Timeout_counter > LOCK) appState = IDLE;
             break;
+        }
 
         case ADD_CARD:
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
@@ -376,6 +377,9 @@ void App_Run(void) {
         default:
             break;
     }
+
+    // Da xu ly phim xong -> reset de khong xu ly lap lai trong vong lap tiep theo
+    key = KEY_NONE;
 }
 
 

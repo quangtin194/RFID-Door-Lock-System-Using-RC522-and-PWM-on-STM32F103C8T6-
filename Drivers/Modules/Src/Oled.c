@@ -77,6 +77,7 @@ typedef struct {
 static const Oled_Glyph_t Oled_Font[] = {
     { ' ', { 0x00, 0x00, 0x00, 0x00, 0x00 } },
     { '!', { 0x00, 0x00, 0x5F, 0x00, 0x00 } },
+    { '*', { 0x14, 0x08, 0x3E, 0x08, 0x14 } },
     { '/', { 0x40, 0x30, 0x08, 0x06, 0x01 } },
     { '1', { 0x00, 0x42, 0x7F, 0x40, 0x00 } },
     { '2', { 0x42, 0x61, 0x51, 0x49, 0x46 } },
@@ -108,6 +109,14 @@ static const Oled_Glyph_t Oled_Font[] = {
     { 's', { 0x44, 0x4A, 0x4A, 0x4A, 0x30 } },
     { 't', { 0x00, 0x02, 0x3F, 0x42, 0x40 } },
     { 'u', { 0x3C, 0x40, 0x40, 0x20, 0x7C } },
+    { '3', { 0x21, 0x41, 0x45, 0x4B, 0x31 } },
+    { '0', { 0x3E, 0x51, 0x49, 0x45, 0x3E } },
+    { '4', { 0x08, 0x14, 0x22, 0x7F, 0x08 } },
+    { '5', { 0x47, 0x45, 0x45, 0x45, 0x39 } },
+    { '6', { 0x3E, 0x49, 0x49, 0x49, 0x32 } },
+    { '7', { 0x01, 0x01, 0x79, 0x05, 0x03 } },
+    { '8', { 0x36, 0x49, 0x49, 0x49, 0x36 } },
+    { '9', { 0x06, 0x49, 0x49, 0x29, 0x1E } },
     { 'x', { 0x44, 0x28, 0x10, 0x28, 0x44 } },
 };
 
@@ -199,7 +208,7 @@ void Oled_ShowStatus(Oled_Msg_t msg)
             Oled_ShowLines("Denied!", 2, NULL, 0);
             break;
         case OLED_MSG_ADMIN_MENU:
-            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DELETE", 1);
+            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:CA", 1);
             break;
         case OLED_MSG_SCAN_ADD_CARD:
             Oled_ShowLines("Scan", 2, "to add!", 2);
@@ -224,6 +233,21 @@ void Oled_ShowStatus(Oled_Msg_t msg)
             break;
         case OLED_MSG_ADMIN_CARD:
             Oled_ShowLines("No Delete", 2, "Admin!", 2);
+            break;
+        case OLED_MSG_PASSWORD_INPUT:
+            Oled_ShowLines("Enter Code", 2, NULL, 0);
+            break;
+        case OLED_MSG_LOCKED:
+            Oled_ShowLines("Secure!", 2, NULL, 0);
+            break;
+        case OLED_MSG_SCAN_NEW_ADMIN:
+            Oled_ShowLines("Scan", 2, "Admin!", 2);
+            break;
+        case OLED_MSG_ADMIN_CHANGED:
+            Oled_ShowLines("Admin", 2, "Done!", 2);
+            break;
+        case OLED_MSG_ADMIN_CHANGE_DENIED:
+            Oled_ShowLines("Admin", 2, "Denied!", 2);
             break;
         default:
             Oled_ShowLines("Scanning!", 2, NULL, 0);
