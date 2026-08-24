@@ -51,6 +51,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 Servo_t servo = {&htim2, TIM_CHANNEL_1};
 Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
+<<<<<<< HEAD
 Keypad_t keypad = {
     // Cot (Columns) - PB12, PB13, PB14: input pull-up, EXTI falling
     .Col1_Port = GPIOB, .Col2_Port = GPIOB, .Col3_Port = GPIOB,
@@ -60,6 +61,9 @@ Keypad_t keypad = {
     .Row1_Port = GPIOB, .Row2_Port = GPIOB, .Row3_Port = GPIOB, .Row4_Port = GPIOB,
     .Row1_Pin  = GPIO_PIN_8, .Row2_Pin = GPIO_PIN_9, .Row3_Pin = GPIO_PIN_10, .Row4_Pin = GPIO_PIN_11,
 };
+=======
+Button_t button = {GPIO_PIN_1, GPIO_PIN_2, EXTI1_IRQn, EXTI2_IRQn};
+>>>>>>> origin/main
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,7 +116,11 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+<<<<<<< HEAD
   App_Init(&keypad ,&buzzer, &huart1, &hi2c1, &hspi1, &servo);
+=======
+  App_Init(&button ,&buzzer, &huart1, &hi2c1, &hspi1, &servo);
+>>>>>>> origin/main
 
   /* USER CODE END 2 */
 
@@ -353,8 +361,12 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+<<<<<<< HEAD
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_8
                           |GPIO_PIN_9, GPIO_PIN_RESET);
+=======
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+>>>>>>> origin/main
 
   /*Configure GPIO pins : PA1 PA2 */
   GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2;
@@ -369,21 +381,29 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+<<<<<<< HEAD
   /*Configure GPIO pins : PB0 PB10 PB11 PB8
                            PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_8
                           |GPIO_PIN_9;
+=======
+  /*Configure GPIO pin : PB0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+>>>>>>> origin/main
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+<<<<<<< HEAD
   /*Configure GPIO pins : PB12 PB13 PB14 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+=======
+>>>>>>> origin/main
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
@@ -391,9 +411,12 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI2_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 
+<<<<<<< HEAD
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
+=======
+>>>>>>> origin/main
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */

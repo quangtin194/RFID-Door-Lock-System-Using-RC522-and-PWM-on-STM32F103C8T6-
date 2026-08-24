@@ -32,8 +32,11 @@ RC522_Status_t RC522_UID_Detected(void);
 UID_Status_t RC522_UID_Verify(void);   // Hàm này sẽ trả về UID_ADMIN, UID_VALID hoặc UID_INVALID dựa trên UID được đọc từ thẻ RFID.
 UID_Status_t RC522_UID_Delete(void); // Hàm này trả về UID_NEW, UID_ADMIN hoặc UID_EXIST
 UID_Status_t RC522_UID_Add(void); // Hàm này trả về UID_NEW, UID_ADMIN hoặc UID_EXIST
+<<<<<<< HEAD
 
 // Nhung ham moi
 UID_Status_t RC522_UID_ChangeAD(void);   // Thuc hien thay doi/khong thay doi the Admin. Sau do tra ve UID_NEW hoac gia tri khac
+=======
+>>>>>>> origin/main
 #endif
 
