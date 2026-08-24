@@ -1,7 +1,7 @@
 // INCLUDE & DEFINE
 #include "RC522.h"
 #include "UART.h"      // để dùng huart1
-#include <stdio.h>      // sprintf
+#include <stdio.h>      // Sprintf
 #include <string.h>     // strlen
 
 #define PICC_REQIDL    0x26
