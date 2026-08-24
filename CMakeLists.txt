@@ -44,15 +44,15 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    Core/Src/mfrc522.c
-    Drivers/Modules/Src/App.c
-    Drivers/Modules/Src/Buzzer.c
-    Drivers/Modules/Src/Button.c
-    Drivers/Modules/Src/Oled.c
-    Drivers/Modules/Src/RC522.c
-    Drivers/Modules/Src/Servo.c
-    Drivers/Modules/Src/UART.c
-    Drivers/Modules/Src/Keypad.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/mfrc522.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/App.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/Buzzer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/Button.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/Oled.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/RC522.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/Servo.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/UART.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/Modules/Src/Keypad.c
 )
 
 # Add include paths
