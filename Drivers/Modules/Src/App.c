@@ -19,7 +19,7 @@ static uint32_t Last_Lock_Second = 0; // Giay cuoi cung da hien thi (tranh ve OL
 
 // XU LY NGAT EXTI
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{ // Đổi sau 
+{ 
     if (GPIO_Pin == Keypad_Handle.Col1_Pin||
         GPIO_Pin == Keypad_Handle.Col2_Pin ||
         GPIO_Pin == Keypad_Handle.Col3_Pin)
@@ -135,11 +135,18 @@ void App_Run(void) {
                 UART_PC_Print("Delete card\n");
                 break;
 
-            case CHANGE_ADMIN_CARD:
+            case ADD_ADMIN_CARD:
                 Keypad_DisableEXTI();
                 oled_status = OLED_MSG_SCAN_NEW_ADMIN;
                 Oled_ShowStatus(oled_status);
-                UART_PC_Print("Scan new admin card\n");
+                UART_PC_Print("Scan to add AD\n");
+                break;
+
+            case DEL_ADMIN_CARD:
+                Keypad_DisableEXTI();
+                oled_status = OLED_MSG_SCAN_DEL_ADMIN;
+                Oled_ShowStatus(oled_status);
+                UART_PC_Print("Scan to delete AD\n");
                 break;
 
             case CARD_ADDED:
@@ -181,11 +188,18 @@ void App_Run(void) {
                 }
                 break;
 
-            case ADMIN_CHANGED:
+            case ADMIN_ADDED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_ADMIN_CHANGED;
+                oled_status = OLED_MSG_ADMIN_ADDED;
                 Oled_ShowStatus(oled_status);
-                UART_PC_Print("Admin card changed\n");
+                UART_PC_Print("New Admin card added\n");
+                break;
+
+            case ADMIN_DELETED:
+                Keypad_DisableEXTI();
+                oled_status = OLED_MSG_ADMIN_DELETED;
+                Oled_ShowStatus(oled_status);
+                UART_PC_Print("Old Admin card deleted\n");
                 break;
 
             case ADMIN_CHANGE_DENIED:
@@ -298,7 +312,12 @@ void App_Run(void) {
                 }
                 else if (key == KEY_3)
                 {
-                    appState = CHANGE_ADMIN_CARD;
+                    appState = ADD_ADMIN_CARD;
+                    Timeout_counter = HAL_GetTick();
+                }
+                else if (key == KEY_4)
+                {
+                    appState = DEL_ADMIN_CARD;
                     Timeout_counter = HAL_GetTick();
                 }
             break;
@@ -358,7 +377,7 @@ void App_Run(void) {
             }
             break;
 
-        case CHANGE_ADMIN_CARD:
+        case ADD_ADMIN_CARD:
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
             else
             {
@@ -366,7 +385,23 @@ void App_Run(void) {
                 if (rc522Status == RC522_OK) 
                 {
                     uidStatus = RC522_UID_AddAD();
-                    if (uidStatus == UID_NEW) appState = ADMIN_CHANGED;
+                    if (uidStatus == UID_NEW) appState = ADMIN_ADDED;
+                    else appState = ADMIN_CHANGE_DENIED; 
+                }
+                else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
+                Timeout_counter = HAL_GetTick();
+            }
+            break;
+
+        case DEL_ADMIN_CARD:
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
+            else
+            {
+                rc522Status = RC522_UID_Detected();
+                if (rc522Status == RC522_OK) 
+                {
+                    uidStatus = RC522_UID_DelAD();
+                    if (uidStatus == UID_NEW) appState = ADMIN_DELETED;
                     else appState = ADMIN_CHANGE_DENIED; 
                 }
                 else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
@@ -390,7 +425,11 @@ void App_Run(void) {
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
             break;
 
-        case ADMIN_CHANGED:
+        case ADMIN_ADDED:
+            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
+            break;
+
+        case ADMIN_DELETED:
             if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
             break;
 

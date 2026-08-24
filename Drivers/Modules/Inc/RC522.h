@@ -36,7 +36,8 @@ UID_Status_t RC522_UID_Delete(void); // Hàm này trả về UID_NEW, UID_ADMIN 
 UID_Status_t RC522_UID_Add(void); // Hàm này trả về UID_NEW, UID_ADMIN hoặc UID_EXIST
 
 // Nhung ham moi
-UID_Status_t RC522_UID_AddAD(void);   // Thuc hien thay doi/khong thay doi the Admin. Sau do tra ve UID_NEW hoac gia tri khac
+UID_Status_t RC522_UID_AddAD(void);   // Thuc hien them the Admin. Sau do tra ve UID_NEW hoac gia tri khac
+UID_Status_t RC522_UID_DelAD(void);
 #endif
 
 
