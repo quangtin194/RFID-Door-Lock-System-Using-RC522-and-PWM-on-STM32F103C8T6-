@@ -9,6 +9,7 @@
 #include "Buzzer.h"
 #include "Keypad.h"
 #include "stdint.h"
+#include "stdio.h"
 
 #define CLOSE_ANGLE 0
 #define OPEN_ANGLE 90

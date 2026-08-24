@@ -45,6 +45,7 @@ void App_Init(
     Servo_Init(servo);
     Buzzer_Init(buzzer);
     Keypad_Init(keypad);
+    Flash_Print_Cards_UART();
 
     // Trang thai System ban dau    
     appState = IDLE;
@@ -155,6 +156,7 @@ void App_Run(void) {
                 Oled_ShowStatus(oled_status);
                 UART_PC_Print("Save ID: ");
                 UART_Print_UID();
+                Flash_Print_Cards_UART();   // <-- THÊM: kiểm tra ngay sau khi Save
                 break;
 
             case CARD_EXISTS:
