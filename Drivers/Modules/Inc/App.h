@@ -7,24 +7,16 @@
 #include "RC522.h"
 #include "Servo.h"
 #include "Buzzer.h"
-<<<<<<< HEAD
 #include "Keypad.h"
-=======
-#include "Button.h"
->>>>>>> origin/main
 #include "stdint.h"
 
 #define CLOSE_ANGLE 0
 #define OPEN_ANGLE 90
 #define TIMEOUT_S_WAIT 1000    // Short wait
 #define TIMEOUT_L_WAIT 5000    // Long wait
-<<<<<<< HEAD
 #define SPAM_TIME 10000
 #define MAX_DENY 3
 #define LOCK 3000
-=======
->>>>>>> origin/main
-
 
 // ENUM DEFINITIONS
 typedef enum {
@@ -39,7 +31,6 @@ typedef enum {
     CARD_EXISTS,
     CARD_DELETED,
     DELETE_DENIED,
-<<<<<<< HEAD
     ERROR_STATE,
 
     PASSWORD_INPUT,
@@ -53,16 +44,18 @@ typedef enum {
 // FUNCTION PROTOTYPES
 void App_Init(
     Keypad_t *keypad,
-=======
-    ERROR_STATE
+
+    PASSWORD_INPUT,
+    CHANGE_ADMIN_CARD,
+    ADMIN_CHANGED,
+    ADMIN_CHANGE_DENIED,
+    LOCKED
 
 } AppState_t;
 
-
 // FUNCTION PROTOTYPES
 void App_Init(
-    Button_t *button,
->>>>>>> origin/main
+    Keypad_t *keypad,
     Buzzer_t *buzzer,
     UART_HandleTypeDef *uart,
     I2C_HandleTypeDef *oled,
