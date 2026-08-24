@@ -82,12 +82,9 @@ UID_Status_t RC522_UID_Verify(void) {
     }
     return UID_INVALID;
 }
-<<<<<<< HEAD
 
 
 // Nhung ham moi
 UID_Status_t RC522_UID_ChangeAD(void) {
     
 }
-=======
->>>>>>> origin/main
