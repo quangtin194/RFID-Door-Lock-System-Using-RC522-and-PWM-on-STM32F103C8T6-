@@ -51,7 +51,16 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 Servo_t servo = {&htim2, TIM_CHANNEL_1};
 Buzzer_t buzzer = {GPIOA, GPIO_PIN_3};
-Keypad_t keypad = {GPIO_PIN_12, GPIO_PIN_13,GPIO_PIN_14, EXTI15_10_IRQn, EXTI15_10_IRQn, EXTI15_10_IRQn};
+Keypad_t keypad = {
+    // Cot (Columns) - PB12, PB13, PB14: input pull-up, EXTI falling
+    .Col1_Port = GPIOB, .Col2_Port = GPIOB, .Col3_Port = GPIOB,
+    .Col1_Pin  = GPIO_PIN_12, .Col2_Pin = GPIO_PIN_13, .Col3_Pin = GPIO_PIN_14,
+    .Col1_IRQn = EXTI15_10_IRQn, .Col2_IRQn = EXTI15_10_IRQn, .Col3_IRQn = EXTI15_10_IRQn,
+    // Hang (Rows) - PB8, PB9, PB10, PB11: output push-pull
+    .Row1_Port = GPIOB, .Row2_Port = GPIOB, .Row3_Port = GPIOB, .Row4_Port = GPIOB,
+    .Row1_Pin  = GPIO_PIN_8, .Row2_Pin = GPIO_PIN_9, .Row3_Pin = GPIO_PIN_10, .Row4_Pin = GPIO_PIN_11,
+};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -365,20 +374,15 @@ static void MX_GPIO_Init(void)
                            PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_8
                           |GPIO_PIN_9;
+
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PB13 PB14 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : PB12 PB13 PB14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -391,6 +395,7 @@ static void MX_GPIO_Init(void)
 
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

@@ -84,8 +84,3 @@ UID_Status_t RC522_UID_Verify(void) {
 }
 
 
-// Nhung ham moi
-UID_Status_t RC522_UID_ChangeAD(void) {
-    
-    return 0;
-}

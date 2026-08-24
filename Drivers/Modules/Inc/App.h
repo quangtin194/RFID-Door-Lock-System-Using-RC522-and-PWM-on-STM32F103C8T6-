@@ -18,7 +18,6 @@
 #define MAX_DENY 3
 #define LOCK 3000
 
-
 // ENUM DEFINITIONS
 typedef enum {
     IDLE,
@@ -33,6 +32,18 @@ typedef enum {
     CARD_DELETED,
     DELETE_DENIED,
     ERROR_STATE,
+
+    PASSWORD_INPUT,
+    CHANGE_ADMIN_CARD,
+    ADMIN_CHANGED,
+    ADMIN_CHANGE_DENIED,
+    LOCKED
+
+} AppState_t;
+
+// FUNCTION PROTOTYPES
+void App_Init(
+    Keypad_t *keypad,
 
     PASSWORD_INPUT,
     CHANGE_ADMIN_CARD,

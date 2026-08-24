@@ -36,6 +36,7 @@ typedef enum {
     OLED_MSG_SCAN_NEW_ADMIN, 
     OLED_MSG_ADMIN_CHANGED,
     OLED_MSG_ADMIN_CHANGE_DENIED
+
 } Oled_Msg_t;
 
 
@@ -45,7 +46,12 @@ void Oled_Clear(void);
 
 void Oled_ShowStatus(Oled_Msg_t msg); // thay Oled_Display()
 
+void Oled_ShowPasswordMask(uint8_t length);   //  Xuat ra chuoi ****
+
+void Oled_ShowLockCountdown(uint32_t seconds); // Hien "Secure!" + thoi gian dem nguoc (giay)
+
 // Nhung ham moi
 void Oled_ShowPasswordMask(uint8_t length);   //  Xuat ra chuoi ****
 
+>>>>>>> QuangTin_update
 #endif
