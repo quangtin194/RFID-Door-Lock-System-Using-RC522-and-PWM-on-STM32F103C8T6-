@@ -35,6 +35,5 @@ UID_Status_t RC522_UID_Add(void); // Hàm này trả về UID_NEW, UID_ADMIN ho�
 
 // Nhung ham moi
 UID_Status_t RC522_UID_ChangeAD(void);   // Thuc hien thay doi/khong thay doi the Admin. Sau do tra ve UID_NEW hoac gia tri khac
-
 #endif
 
