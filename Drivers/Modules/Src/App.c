@@ -111,7 +111,7 @@ void App_Run(void) {
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
 
-                // Từng level khóa: lv1 khoa 3s, lv2 khoa 6s, lv3 khoa 12s, lv4 khoa 24s
+                // Từng level khóa: lv1 khoa 3s, lv2 - 6s, lv3 - 12s, lv4 - 24s
                 Lock_Level++;
                 if (Lock_Level > 4) Lock_Level = 4;
                 Lock_Duration = LOCK * (1UL << (Lock_Level - 1));
@@ -156,7 +156,7 @@ void App_Run(void) {
                 Oled_ShowStatus(oled_status);
                 UART_PC_Print("Save ID: ");
                 UART_Print_UID();
-                Flash_Print_Cards_UART();   // <-- THÊM: kiểm tra ngay sau khi Save
+                Flash_Print_Cards_UART();   
                 break;
 
             case CARD_EXISTS:
@@ -295,7 +295,6 @@ void App_Run(void) {
                 }
 
                 Keypad_Password_Reset();
-                key = KEY_NONE;   // Reset key
                 Timeout_counter = HAL_GetTick();
             }
             break;
@@ -447,6 +446,6 @@ void App_Run(void) {
             break;
     }
 
-    // Da xu ly phim xong -> reset de khong xu ly lap lai trong vong lap tiep theo
+    // Reset key
     key = KEY_NONE;
 }

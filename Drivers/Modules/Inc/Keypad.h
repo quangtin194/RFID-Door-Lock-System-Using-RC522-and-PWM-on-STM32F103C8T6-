@@ -5,6 +5,7 @@
 #include "stm32f1xx_hal.h"
 #include <stdint.h>
 #include <stm32f103xb.h>
+
 #define KEYPAD_ROWS 4
 #define KEYPAD_COLS 3
 // ENUM DEFINITIONS
