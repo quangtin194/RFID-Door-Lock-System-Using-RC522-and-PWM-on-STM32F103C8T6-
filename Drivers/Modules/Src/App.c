@@ -4,7 +4,7 @@
 // VARIABLE DEFINITIONS
 static volatile AppState_t appState;
 static volatile AppState_t previous_State;
-static volatile Key_t key; 
+static volatile Key_t key;
 static uint8_t Deny_counter = 0;
 static uint32_t Deny_start_time = 0;
 static uint32_t Timeout_counter;
@@ -12,419 +12,402 @@ static RC522_Status_t rc522Status;
 static UID_Status_t uidStatus;
 static volatile uint8_t keypad_event;
 
-static uint8_t Lock_Level = 0;        // So lan bi khoa lien tiep
-static uint32_t Lock_Duration = 0;    // Thoi gian khoa hien tai (ms)
-static uint32_t Last_Lock_Second = 0; // Giay cuoi cung da hien thi (tranh ve OLED lien tuc)
+static uint8_t Lock_Level = 0;     // So lan bi khoa lien tiep
+static uint32_t Lock_Duration = 0; // Thoi gian khoa hien tai (ms)
+static uint32_t Last_Lock_Second =
+    0; // Giay cuoi cung da hien thi (tranh ve OLED lien tuc)
 
 // XU LY NGAT EXTI
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{ 
-    if (GPIO_Pin == Keypad_Handle.Col1_Pin||
-        GPIO_Pin == Keypad_Handle.Col2_Pin ||
-        GPIO_Pin == Keypad_Handle.Col3_Pin)
-    {
-        keypad_event = 1;
-    }
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  if (GPIO_Pin == Keypad_Handle.Col1_Pin ||
+      GPIO_Pin == Keypad_Handle.Col2_Pin ||
+      GPIO_Pin == Keypad_Handle.Col3_Pin) {
+    keypad_event = 1;
+  }
 }
 
 // FUNCTION DEFINITIONS
-void App_Init(
-    Keypad_t *keypad,
-    Buzzer_t *buzzer,
-    UART_HandleTypeDef *uart,
-    I2C_HandleTypeDef *oled,
-    SPI_HandleTypeDef *rc522,
-    Servo_t *servo
-)
-{
-    // Init Modules
-    Oled_Init(oled);
-    UART_Init(uart);
-    RC522_Init(rc522);
-    Servo_Init(servo);
-    Buzzer_Init(buzzer);
-    Keypad_Init(keypad);
-    Flash_Print_Cards_UART();
+void App_Init(Keypad_t *keypad, Buzzer_t *buzzer, UART_HandleTypeDef *uart,
+              I2C_HandleTypeDef *oled, SPI_HandleTypeDef *rc522,
+              Servo_t *servo) {
+  // Init Modules
+  Oled_Init(oled);
+  UART_Init(uart);
+  RC522_Init(rc522);
+  Servo_Init(servo);
+  Buzzer_Init(buzzer);
+  Keypad_Init(keypad);
+  Flash_Print_Cards_UART();
 
-    // Trang thai System ban dau    
-    appState = IDLE;
-    previous_State = ERROR_STATE;
+  appState = IDLE;
+  previous_State = ERROR_STATE;
 
-    // Trang thai Keypad ban dau
-    key = KEY_NONE;
+  key = KEY_NONE;
 }
 
 void App_Run(void) {
-// State Entry
-    if (appState != previous_State)
-    {
-        previous_State = appState;
-        switch (appState) {
-            case IDLE:
-                Keypad_EnableEXTI();
-                Servo_SetAngle(CLOSE_ANGLE);
-                Buzzer_off();
-                Oled_ShowLines("Scanning!", 2, NULL, 0);
-                break;
 
-            case VERIFY_UID:
-                Keypad_DisableEXTI();
-                break;
-
-            case PASSWORD_INPUT:
-                Keypad_EnableEXTI();    
-                Oled_ShowLines("Enter Code", 2, NULL, 0);
-                UART_PC_Print("Enter password\n");
-                break;
-
-            case ADMIN_MODE:
-                Keypad_EnableEXTI(); 
-                Servo_SetAngle(OPEN_ANGLE);
-                Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
-                UART_PC_Print("Admin mode\n");
-                break;
-
-            case ACCESS_ALLOWED:
-                Keypad_DisableEXTI();
-                Servo_SetAngle(OPEN_ANGLE);
-                Oled_ShowLines("Welcome!", 2, NULL, 0);
-                UART_PC_Print("Welcome ID: ");
-                UART_Print_UID();
-                break;
-
-            case ACCESS_DENIED:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Denied!", 2, NULL, 0);
-                Buzzer_on();
-                UART_PC_Print("Denied ID: ");
-                UART_Print_UID();
-                break;
-
-            case LOCKED:
-                Keypad_DisableEXTI();
-                Servo_SetAngle(CLOSE_ANGLE);
-                Buzzer_on();
-
-                // Từng level khóa: lv1 khoa 3s, lv2 - 6s, lv3 - 12s, lv4 - 24s
-                Lock_Level++;
-                if (Lock_Level > 4) Lock_Level = 4;
-                Lock_Duration = LOCK * (1UL << (Lock_Level - 1));
-                Timeout_counter = HAL_GetTick();
-                Last_Lock_Second = 0;
-
-                Oled_ShowLockCountdown(Lock_Duration / 1000); // Hiển thị CountDown trên OLED
-                UART_PC_Print("System locked\n");
-                break;
-
-            case ADD_CARD:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Scan", 2, "to add!", 2);
-                UART_PC_Print("Add card\n");
-                break;
-
-            case DELETE_CARD:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Scan", 2, "to delete!", 2);
-                UART_PC_Print("Delete card\n");
-                break;
-
-            case ADD_ADMIN_CARD:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Scan to", 2, "add Admin!", 2);
-                UART_PC_Print("Scan to add AD\n");
-                break;
-
-            case DEL_ADMIN_CARD:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Scan to", 2, "del Admin!", 2);
-                UART_PC_Print("Scan to delete AD\n");
-                break;
-
-            case CARD_ADDED:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Card", 2, "Added!", 2);
-                UART_PC_Print("Save ID: ");
-                UART_Print_UID();
-                Flash_Print_Cards_UART();   
-                break;
-
-            case CARD_EXISTS:
-                Keypad_DisableEXTI();
-                 Oled_ShowLines("Card", 2, "Exists!", 2);
-                UART_PC_Print("Card exists\n");
-                break;
-
-            case CARD_DELETED:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Card", 2, "Deleted!", 2);
-                UART_PC_Print("Delete ID: ");
-                UART_Print_UID();
-                break;
-
-            case DELETE_DENIED:
-                Keypad_DisableEXTI();
-                if (uidStatus == UID_NEW) 
-                {
-                    Oled_ShowLines("Not Found!", 2, NULL, 0);
-                    UART_PC_Print("UID Not found\n");
-                }
-                else if (uidStatus == UID_ADMIN) 
-                {
-                    Oled_ShowLines("No Delete", 2, "Admin!", 2);
-                    UART_PC_Print("Cannot delete Admin card\n");
-                }
-                break;
-
-            case ADMIN_ADDED:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Admin", 2, "Added!", 2);
-                UART_PC_Print("New Admin card added\n");
-                break;
-
-            case ADMIN_DELETED:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Admin", 2, "Deleted!", 2);
-                UART_PC_Print("Old Admin card deleted\n");
-                break;
-
-            case ADMIN_CHANGE_DENIED:
-                Keypad_DisableEXTI();
-                Oled_ShowLines("Admin", 2, "Denied!", 2);
-                UART_PC_Print("Cannot change admin card\n");
-                break;
-
-            case ERROR_STATE:
-                Keypad_DisableEXTI();
-                Servo_SetAngle(CLOSE_ANGLE);
-                Buzzer_on();
-                Oled_ShowLines("Error!", 2, NULL, 0);
-                UART_PC_Print("ERROR\n");
-                break;
-
-            default:
-                break;
-        }
-    }
-    //_____________________________________________
-// State Execution
-    if (keypad_event)
-    {
-        keypad_event = 0;
-        key = Keypad_Scan();
-    }
-
+  if (appState != previous_State) {
+    previous_State = appState;
     switch (appState) {
-        case IDLE:
-            rc522Status = RC522_UID_Detected();
-            if (rc522Status == RC522_OK) appState = VERIFY_UID;
-            else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-            else if (key == KEY_THANG) appState = PASSWORD_INPUT;
-            break;
+    case IDLE:
+      Keypad_EnableEXTI();
+      Servo_SetAngle(CLOSE_ANGLE);
+      Buzzer_off();
+      Oled_ShowLines("Scanning!", 2, NULL, 0);
+      break;
 
-        case VERIFY_UID:
-            uidStatus = RC522_UID_Verify();
-            if (uidStatus == UID_ADMIN) 
-            {
-                Deny_counter = 0;
-                Lock_Level = 0;
-                appState = ADMIN_MODE;
-            }
-            else if (uidStatus == UID_VALID) 
-            {
-                Deny_counter = 0;
-                Lock_Level = 0;
-                appState = ACCESS_ALLOWED;
-            }
-            else if (uidStatus == UID_INVALID)
-            {
-                if (Deny_counter == 0) Deny_start_time = HAL_GetTick();
-                if (HAL_GetTick() - Deny_start_time > SPAM_TIME) Deny_counter = 0;
+    case VERIFY_UID:
+      Keypad_DisableEXTI();
+      break;
 
-                Deny_counter++;
+    case PASSWORD_INPUT:
+      Keypad_EnableEXTI();
+      Oled_ShowLines("Enter Code", 2, NULL, 0);
+      UART_PC_Print("Enter password\n");
+      break;
 
-                if (Deny_counter >= MAX_DENY) 
-                {
-                    Deny_counter = 0;
-                    appState = LOCKED;
-                }
-                else appState = ACCESS_DENIED;
-            }
-            Timeout_counter = HAL_GetTick();
-            break;
+    case ADMIN_MODE:
+      Keypad_EnableEXTI();
+      Servo_SetAngle(OPEN_ANGLE);
+      Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
+      UART_PC_Print("Admin mode\n");
+      break;
 
-        case PASSWORD_INPUT:
-            if (key >= KEY_0 && key <= KEY_9)
-            {
-                Keypad_Password_Append(key);
-                Oled_ShowPasswordMask(Keypad_Password_GetLength());
-            }
-            else if (key == KEY_SAO) 
-            {
-                Keypad_Password_Del();
-                Oled_ShowPasswordMask(Keypad_Password_GetLength());
-            }
-            else if (key == KEY_THANG)
-            {
-                if (Keypad_Password_Verify())
-                {
-                    Lock_Level = 0;
-                    appState = ACCESS_ALLOWED;
-                }
-                else
-                {
-                    appState = ACCESS_DENIED;
-                }
+    case ACCESS_ALLOWED:
+      Keypad_DisableEXTI();
+      Servo_SetAngle(OPEN_ANGLE);
+      Oled_ShowLines("Welcome!", 2, NULL, 0);
+      UART_PC_Print("Welcome ID: ");
+      UART_Print_UID();
+      break;
 
-                Keypad_Password_Reset();
-                Timeout_counter = HAL_GetTick();
-            }
-            break;
+    case ACCESS_DENIED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Denied!", 2, NULL, 0);
+      Buzzer_on();
+      UART_PC_Print("Denied ID: ");
+      UART_Print_UID();
+      break;
 
-        case ADMIN_MODE:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-                if (key == KEY_1)
-                {
-                    appState = ADD_CARD;
-                    Timeout_counter = HAL_GetTick();
-                }
-                else if (key == KEY_2)
-                {
-                    appState = DELETE_CARD;
-                    Timeout_counter = HAL_GetTick();
-                }
-                else if (key == KEY_3)
-                {
-                    appState = ADD_ADMIN_CARD;
-                    Timeout_counter = HAL_GetTick();
-                }
-                else if (key == KEY_4)
-                {
-                    appState = DEL_ADMIN_CARD;
-                    Timeout_counter = HAL_GetTick();
-                }
-            break;
+    case LOCKED:
+      Keypad_DisableEXTI();
+      Servo_SetAngle(CLOSE_ANGLE);
+      Buzzer_on();
 
-        case ACCESS_ALLOWED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+      Lock_Level++;
+      if (Lock_Level > 4)
+        Lock_Level = 4;
+      Lock_Duration = LOCK * (1UL << (Lock_Level - 1));
+      Timeout_counter = HAL_GetTick();
+      Last_Lock_Second = 0;
 
-        case ACCESS_DENIED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+      Oled_ShowLockCountdown(Lock_Duration /
+                             1000); // Hiển thị CountDown trên OLED
+      UART_PC_Print("System locked\n");
+      break;
 
-        case LOCKED:
-        {
-            uint32_t elapsed = HAL_GetTick() - Timeout_counter;
-            if (elapsed >= Lock_Duration) {
-                appState = IDLE;
-            }
-            else {
-                // Cap nhat OLED moi giay mot lan
-                uint32_t remaining_sec = (Lock_Duration - elapsed + 999) / 1000;
-                if (remaining_sec != Last_Lock_Second) {
-                    Last_Lock_Second = remaining_sec;
-                    Oled_ShowLockCountdown(remaining_sec);
-                }
-            }
-            break;
-        }
+    case ADD_CARD:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Scan", 2, "to add!", 2);
+      UART_PC_Print("Add card\n");
+      break;
 
-        case ADD_CARD:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-            else
-            {
-                rc522Status = RC522_UID_Detected();
-                if (rc522Status == RC522_OK)
-                {
-                    uidStatus = RC522_UID_Add();
-                    if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN) appState = CARD_EXISTS;
-                    else appState = CARD_ADDED;
-                }
-                else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-            }
-            break;
+    case DELETE_CARD:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Scan", 2, "to delete!", 2);
+      UART_PC_Print("Delete card\n");
+      break;
 
-        case DELETE_CARD:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-            else
-            {
-                rc522Status = RC522_UID_Detected();
-                if (rc522Status == RC522_OK)
-                {
-                    uidStatus = RC522_UID_Delete();
-                    if (uidStatus == UID_EXIST) appState = CARD_DELETED;
-                    else appState = DELETE_DENIED;
-                }
-                else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-            }
-            break;
+    case ADD_ADMIN_CARD:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Scan to", 2, "add Admin!", 2);
+      UART_PC_Print("Scan to add AD\n");
+      break;
 
-        case ADD_ADMIN_CARD:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-            else
-            {
-                rc522Status = RC522_UID_Detected();
-                if (rc522Status == RC522_OK) 
-                {
-                    uidStatus = RC522_UID_AddAD();
-                    if (uidStatus == UID_NEW) appState = ADMIN_ADDED;
-                    else appState = ADMIN_CHANGE_DENIED; 
-                }
-                else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-            }
-            break;
+    case DEL_ADMIN_CARD:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Scan to", 2, "del Admin!", 2);
+      UART_PC_Print("Scan to delete AD\n");
+      break;
 
-        case DEL_ADMIN_CARD:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
-            else
-            {
-                rc522Status = RC522_UID_Detected();
-                if (rc522Status == RC522_OK) 
-                {
-                    uidStatus = RC522_UID_DelAD();
-                    if (uidStatus == UID_EXIST) appState = ADMIN_DELETED;
-                    else appState = ADMIN_CHANGE_DENIED; 
-                }
-                else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-            }
-            break;
+    case CARD_ADDED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Card", 2, "Added!", 2);
+      UART_PC_Print("Save ID: ");
+      UART_Print_UID();
+      Flash_Print_Cards_UART();
+      break;
 
-        case CARD_ADDED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case CARD_EXISTS:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Card", 2, "Exists!", 2);
+      UART_PC_Print("Card exists\n");
+      break;
 
-        case CARD_EXISTS:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case CARD_DELETED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Card", 2, "Deleted!", 2);
+      UART_PC_Print("Delete ID: ");
+      UART_Print_UID();
+      break;
 
-        case CARD_DELETED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case DELETE_DENIED:
+      Keypad_DisableEXTI();
+      if (uidStatus == UID_NEW) {
+        Oled_ShowLines("Not Found!", 2, NULL, 0);
+        UART_PC_Print("UID Not found\n");
+      } else if (uidStatus == UID_ADMIN) {
+        Oled_ShowLines("No Delete", 2, "Admin!", 2);
+        UART_PC_Print("Cannot delete Admin card\n");
+      }
+      break;
 
-        case DELETE_DENIED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case ADMIN_ADDED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Admin", 2, "Added!", 2);
+      UART_PC_Print("New Admin card added\n");
+      break;
 
-        case ADMIN_ADDED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case ADMIN_DELETED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Admin", 2, "Deleted!", 2);
+      UART_PC_Print("Old Admin card deleted\n");
+      break;
 
-        case ADMIN_DELETED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case ADMIN_CHANGE_DENIED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Admin", 2, "Denied!", 2);
+      UART_PC_Print("Cannot change admin card\n");
+      break;
 
-        case ADMIN_CHANGE_DENIED:
-            if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT) appState = IDLE;
-            break;
+    case ERROR_STATE:
+      Keypad_DisableEXTI();
+      Servo_SetAngle(CLOSE_ANGLE);
+      Buzzer_on();
+      Oled_ShowLines("Error!", 2, NULL, 0);
+      UART_PC_Print("ERROR\n");
+      break;
 
-        case ERROR_STATE:
-            if (RC522_UID_Detected() != RC522_ERROR) appState = IDLE;
-            break;
-
-        default:
-            break;
+    default:
+      break;
     }
+  }
+  //_____________________________________________
+  if (keypad_event) {
+    keypad_event = 0;
+    key = Keypad_Scan();
+  }
 
-    // Reset key
-    key = KEY_NONE;
+  switch (appState) {
+  case IDLE:
+    rc522Status = RC522_UID_Detected();
+    if (rc522Status == RC522_OK)
+      appState = VERIFY_UID;
+    else if (rc522Status == RC522_ERROR)
+      appState = ERROR_STATE;
+    else if (key == KEY_THANG)
+      appState = PASSWORD_INPUT;
+    break;
+
+  case VERIFY_UID:
+    uidStatus = RC522_UID_Verify();
+    if (uidStatus == UID_ADMIN) {
+      Deny_counter = 0;
+      Lock_Level = 0;
+      appState = ADMIN_MODE;
+    } else if (uidStatus == UID_VALID) {
+      Deny_counter = 0;
+      Lock_Level = 0;
+      appState = ACCESS_ALLOWED;
+    } else if (uidStatus == UID_INVALID) {
+      if (Deny_counter == 0)
+        Deny_start_time = HAL_GetTick();
+      if (HAL_GetTick() - Deny_start_time > SPAM_TIME)
+        Deny_counter = 0;
+
+      Deny_counter++;
+
+      if (Deny_counter >= MAX_DENY) {
+        Deny_counter = 0;
+        appState = LOCKED;
+      } else
+        appState = ACCESS_DENIED;
+    }
+    Timeout_counter = HAL_GetTick();
+    break;
+
+  case PASSWORD_INPUT:
+    if (key >= KEY_0 && key <= KEY_9) {
+      Keypad_Password_Append(key);
+      Oled_ShowPasswordMask(Keypad_Password_GetLength());
+    } else if (key == KEY_SAO) {
+      Keypad_Password_Del();
+      Oled_ShowPasswordMask(Keypad_Password_GetLength());
+    } else if (key == KEY_THANG) {
+      if (Keypad_Password_Verify()) {
+        Lock_Level = 0;
+        appState = ACCESS_ALLOWED;
+      } else {
+        appState = ACCESS_DENIED;
+      }
+
+      Keypad_Password_Reset();
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+
+  case ADMIN_MODE:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    if (key == KEY_1) {
+      appState = ADD_CARD;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_2) {
+      appState = DELETE_CARD;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_3) {
+      appState = ADD_ADMIN_CARD;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_4) {
+      appState = DEL_ADMIN_CARD;
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+
+  case ACCESS_ALLOWED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case ACCESS_DENIED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case LOCKED: {
+    uint32_t elapsed = HAL_GetTick() - Timeout_counter;
+    if (elapsed >= Lock_Duration) {
+      appState = IDLE;
+    } else {
+
+      uint32_t remaining_sec = (Lock_Duration - elapsed + 999) / 1000;
+      if (remaining_sec != Last_Lock_Second) {
+        Last_Lock_Second = remaining_sec;
+        Oled_ShowLockCountdown(remaining_sec);
+      }
+    }
+    break;
+  }
+
+  case ADD_CARD:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else {
+      rc522Status = RC522_UID_Detected();
+      if (rc522Status == RC522_OK) {
+        uidStatus = RC522_UID_Add();
+        if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN)
+          appState = CARD_EXISTS;
+        else
+          appState = CARD_ADDED;
+      } else if (rc522Status == RC522_ERROR)
+        appState = ERROR_STATE;
+    }
+    break;
+
+  case DELETE_CARD:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else {
+      rc522Status = RC522_UID_Detected();
+      if (rc522Status == RC522_OK) {
+        uidStatus = RC522_UID_Delete();
+        if (uidStatus == UID_EXIST)
+          appState = CARD_DELETED;
+        else
+          appState = DELETE_DENIED;
+      } else if (rc522Status == RC522_ERROR)
+        appState = ERROR_STATE;
+    }
+    break;
+
+  case ADD_ADMIN_CARD:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else {
+      rc522Status = RC522_UID_Detected();
+      if (rc522Status == RC522_OK) {
+        uidStatus = RC522_UID_AddAD();
+        if (uidStatus == UID_NEW)
+          appState = ADMIN_ADDED;
+        else
+          appState = ADMIN_CHANGE_DENIED;
+      } else if (rc522Status == RC522_ERROR)
+        appState = ERROR_STATE;
+    }
+    break;
+
+  case DEL_ADMIN_CARD:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else {
+      rc522Status = RC522_UID_Detected();
+      if (rc522Status == RC522_OK) {
+        uidStatus = RC522_UID_DelAD();
+        if (uidStatus == UID_EXIST)
+          appState = ADMIN_DELETED;
+        else
+          appState = ADMIN_CHANGE_DENIED;
+      } else if (rc522Status == RC522_ERROR)
+        appState = ERROR_STATE;
+    }
+    break;
+
+  case CARD_ADDED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case CARD_EXISTS:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case CARD_DELETED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case DELETE_DENIED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case ADMIN_ADDED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case ADMIN_DELETED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case ADMIN_CHANGE_DENIED:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
+      appState = IDLE;
+    break;
+
+  case ERROR_STATE:
+    if (RC522_UID_Detected() != RC522_ERROR)
+      appState = IDLE;
+    break;
+
+  default:
+    break;
+  }
+
+  // Reset key
+  key = KEY_NONE;
 }

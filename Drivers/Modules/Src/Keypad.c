@@ -51,7 +51,7 @@ Key_t Keypad_Scan(void) {
         {KEY_7,KEY_8,KEY_9},
         {KEY_THANG,KEY_0,KEY_SAO},
     };
-    Keypad_DisableEXTI();  //tắt ngắt để phòng ngừa
+    Keypad_DisableEXTI(); 
     for (uint8_t r = 0; r < KEYPAD_ROWS; r++) {
         for (uint8_t i = 0; i < KEYPAD_ROWS; i++) {
             HAL_GPIO_WritePin(rowPorts[i], rowPins[i], GPIO_PIN_SET);
@@ -68,12 +68,12 @@ Key_t Keypad_Scan(void) {
         if (key != KEY_NONE) break;
     }
 
-    // Trả về low
+   
     for (uint8_t i = 0; i < KEYPAD_ROWS; i++) {
         HAL_GPIO_WritePin(rowPorts[i], rowPins[i], GPIO_PIN_RESET);
     }
 
-    // Debounce
+    
     uint32_t release_start = HAL_GetTick();
     while (HAL_GetTick() - release_start < 500) {
         uint8_t released = 1;
@@ -87,12 +87,12 @@ Key_t Keypad_Scan(void) {
         HAL_Delay(1);
     }
 
-    Keypad_EnableEXTI();// bật ngắt lại 
+    Keypad_EnableEXTI(); 
     return key;
 }
 void Keypad_Password_Append(Key_t key) {
-    if (key < KEY_0 || key > KEY_9) return; // Chi nhan phim so
-    if (Password_Index >= PASSWORD_LENGTH) return; // Da day
+    if (key < KEY_0 || key > KEY_9) return; 
+    if (Password_Index >= PASSWORD_LENGTH) return; 
     Password_Buffer[Password_Index++] = (uint8_t)(key - KEY_0);
 }
 
