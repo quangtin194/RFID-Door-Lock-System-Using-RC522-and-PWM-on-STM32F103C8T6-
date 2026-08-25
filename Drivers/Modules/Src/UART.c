@@ -29,7 +29,7 @@ void UART_Print_UID(void) {
         char logStr[120];
         snprintf(logStr, sizeof(logStr), "\r\n %02X %02X %02X %02X\r\n", 
                  CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
-        
+    
         UART_PC_Print(logStr);
     }
 }

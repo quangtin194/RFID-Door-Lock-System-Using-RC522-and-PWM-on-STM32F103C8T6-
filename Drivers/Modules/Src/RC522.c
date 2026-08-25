@@ -1,14 +1,14 @@
 // INCLUDE & DEFINE
 #include "RC522.h"
-#include "UART.h"      // để dùng huart1
-#include <stdio.h>      // Sprintf
-#include <string.h>     // strlen
+#include "UART.h"      
+#include <stdio.h>    
+#include <string.h>  
 
 #define PICC_REQIDL    0x26
 #define FLASH_USER_START_ADDR   0x0800FC00
 #define MAX_CARDS 5
 #define MAX_ADMINS 3
-#define FLASH_XOR_KEY 0x3C5A96F1 // Khóa mã hóa (Bạn có thể đổi tùy ý)
+#define FLASH_XOR_KEY 0x3C5A96F1 
 
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
@@ -25,6 +25,7 @@ void RC522_Init(SPI_HandleTypeDef *spi) {
     RC522_Handle = spi;
     TM_MFRC522_Init();
 }
+
 uint8_t Is_Admin_Card(uint8_t *uid) {
     if (memcmp(uid, AdminUID, 4) == 0) {
         return 1;
@@ -37,9 +38,8 @@ uint8_t Is_Admin_Card(uint8_t *uid) {
     return 0; 
 }
 
-
 void Flash_Save_Cards(void) {
-    __disable_irq();            // <-- QUAN TRỌNG: khóa toàn bộ ngắt trong lúc ghi Flash
+    __disable_irq();            
 
     HAL_FLASH_Unlock();
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPERR);
@@ -53,7 +53,7 @@ void Flash_Save_Cards(void) {
     if (HAL_FLASHEx_Erase(&EraseInitStruct, &PageError) != HAL_OK) {
         HAL_FLASH_Lock();
         __enable_irq();
-        return;   // Erase lỗi -> không ghi tiếp, tránh ghi rác
+        return;   
     }
 
     uint32_t counts = ((AdminCount << 8) | CardCount) ^ FLASH_XOR_KEY;
@@ -79,15 +79,13 @@ void Flash_Save_Cards(void) {
     }
 
     HAL_FLASH_Lock();
-    __enable_irq();              // <-- mở lại ngắt SAU khi ghi xong hoàn toàn
+    __enable_irq();           
 
-    // ---- VERIFY: đọc lại ngay và so sánh, in ra UART để bạn thấy save có đúng không ----
     uint32_t *check_ptr = (uint32_t *)FLASH_USER_START_ADDR;
     char dbg[100];
     sprintf(dbg, "[SAVE] counts_raw=0x%08lX  readback=0x%08lX %s\r\n",
             counts, check_ptr[0],
             (check_ptr[0] == counts) ? "OK" : "MISMATCH!!");
-    // Nếu bạn có sẵn huart1 global, có thể transmit trực tiếp; nếu không, gọi Flash_Print_Cards_UART(&huart1) sau đó.
 }
 
 void Flash_Load_Cards(void) {
@@ -97,15 +95,12 @@ void Flash_Load_Cards(void) {
     uint32_t *flash_ptr = (uint32_t *)FLASH_USER_START_ADDR; 
     uint32_t counts = flash_ptr[0]; 
     
-    // LƯU Ý QUAN TRỌNG: Phải kiểm tra 0xFFFFFFFF trước khi XOR!
-    // Vì nếu Flash trống (0xFFFFFFFF), đem đi XOR sẽ làm mất dấu nhận diện vùng nhớ trống.
     if (counts == 0xFFFFFFFF) { 
         CardCount = 0; 
         AdminCount = 0;
         return;
     }
-    
-    // Giải mã counts bằng XOR
+
     counts ^= FLASH_XOR_KEY;
     
     CardCount = counts & 0xFF;            
@@ -114,11 +109,10 @@ void Flash_Load_Cards(void) {
     if (CardCount > MAX_CARDS) CardCount = 0;
     if (AdminCount > MAX_ADMINS) AdminCount = 0;
 
-    // Đọc và giải mã Admin UIDs
     for (int i = 0; i < AdminCount; i++) {
         uint32_t admin_word = flash_ptr[i + 1];
         
-        admin_word ^= FLASH_XOR_KEY; // <--- Giải mã XOR lần 2 để lấy lại UID gốc
+        admin_word ^= FLASH_XOR_KEY; 
         
         AdminUIDs[i][0] = (admin_word >> 24) & 0xFF;
         AdminUIDs[i][1] = (admin_word >> 16) & 0xFF;
@@ -126,11 +120,10 @@ void Flash_Load_Cards(void) {
         AdminUIDs[i][3] = admin_word & 0xFF;
     }
 
-    // Đọc và giải mã Authorized Cards UIDs
     for (int i = 0; i < CardCount; i++) {
         uint32_t uid_word = flash_ptr[i + 4];
         
-        uid_word ^= FLASH_XOR_KEY; // <--- Giải mã XOR lần 2 để lấy lại UID gốc
+        uid_word ^= FLASH_XOR_KEY; 
         
         AuthorizedCards[i][0] = (uid_word >> 24) & 0xFF;
         AuthorizedCards[i][1] = (uid_word >> 16) & 0xFF;
@@ -138,6 +131,7 @@ void Flash_Load_Cards(void) {
         AuthorizedCards[i][3] = uid_word & 0xFF;
     }
 }
+
 void Flash_Print_Cards_UART(void) {
     char buf[100];
     uint32_t *flash_ptr = (uint32_t *)FLASH_USER_START_ADDR;
@@ -162,6 +156,7 @@ void Flash_Print_Cards_UART(void) {
         UART_PC_Print(buf);
     }
 }
+
 UID_Status_t RC522_UID_Add(void) {
     if (CardCount >= MAX_CARDS) return UID_INVALID;
     if(Is_Admin_Card(CurrentUID)) {
@@ -204,7 +199,6 @@ UID_Status_t RC522_UID_Delete(void) {
 RC522_Status_t RC522_UID_Detected(void) {
     uint8_t hardware_version = TM_MFRC522_ReadRegister(0x37); 
     
-    // Nếu đọc ra 0x00 (mất GND/MISO) hoặc 0xFF (treo dây), báo lỗi ngay lập tức
     if (hardware_version == 0x00 || hardware_version == 0xFF) {
         return RC522_ERROR; 
     }
@@ -235,7 +229,6 @@ UID_Status_t RC522_UID_Verify(void) {
     return UID_INVALID;
 }
 
-// Nhung ham moi
 UID_Status_t RC522_UID_AddAD(void) {
     if (memcmp(CurrentUID, AdminUID, 4) == 0) {
         return UID_ADMIN; 
@@ -271,22 +264,16 @@ UID_Status_t RC522_UID_DelAD(void) {
     if (memcmp(CurrentUID, AdminUID, 4) == 0) {
         return UID_ADMIN;
     }
-
     for (int i = 0; i < AdminCount; i++) {
         if (memcmp(CurrentUID, AdminUIDs[i], 4) == 0) {
             for (int j = i; j < AdminCount - 1; j++) {
                 memcpy(AdminUIDs[j], AdminUIDs[j + 1], 4);
             }
-
             memset(AdminUIDs[AdminCount - 1], 0x00, 4);
             AdminCount--;
-
             Flash_Save_Cards();
-
             return UID_EXIST;
         }
     }
-
     return UID_NEW;
 }
-// new
