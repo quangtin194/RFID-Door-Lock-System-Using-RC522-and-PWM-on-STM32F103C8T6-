@@ -1,6 +1,7 @@
 // INCLUDE & DEFINE
 #include "Oled.h"
 #include "string.h"
+
 #define OLED_CMD_MODE   0x00   /* control byte: next byte(s) = command */
 #define OLED_DATA_MODE  0x40   /* control byte: next byte(s) = data    */
 #define OLED_FONT_COUNT   (sizeof(Oled_Font) / sizeof(Oled_Font[0]))
@@ -9,66 +10,9 @@
  
 // VARIABLE DEFINITIONS
 static I2C_HandleTypeDef *Oled_Handle;
-
-// FUNCTION DEFINITIONS
 static uint8_t Oled_Buffer[OLED_WIDTH * OLED_PAGES]; // nhân bản dữ liệu gửi qua OLED 
-static void Oled_WriteCommand(uint8_t cmd)
-{
-    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_CMD_MODE,
-                       I2C_MEMADD_SIZE_8BIT, &cmd, 1,HAL_MAX_DELAY);
-} //lệnh điều chỉnh cưởng độ sáng .....
-static void Oled_WriteData(const uint8_t *data, uint16_t size)
-{
-    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_DATA_MODE,
-                       I2C_MEMADD_SIZE_8BIT, (uint8_t *)data, size,HAL_MAX_DELAY);
-} //lệnh bật tắt pixel, ghi thẳng vào RAM
-static void Oled_UpdateScreen(void)
-{
-    for (uint8_t page = 0; page < OLED_PAGES; page++) {
-        Oled_WriteCommand(0xB0 + page);                            /* set page address    */
-        Oled_WriteCommand(0x00 + (OLED_COL_OFFSET & 0x0F));         /* lower column nibble */
-        Oled_WriteCommand(0x10 + (OLED_COL_OFFSET >> 4));           /* higher column nibble*/
-        Oled_WriteData(&Oled_Buffer[page * OLED_WIDTH], OLED_WIDTH);
-    }
-}
-void Oled_Init(I2C_HandleTypeDef *i2c) {
-    Oled_Handle = i2c;
-    /* Standard SH1106 1.3" power-on sequence. */
-    Oled_WriteCommand(0xAE); /* display off                      */
-    Oled_WriteCommand(0x40); /* start line address = 0           */
-    Oled_WriteCommand(0xB0); /* page start address               */
-    Oled_WriteCommand(0xC8); /* COM output scan direction, remap */
-    Oled_WriteCommand(0x00 + (OLED_COL_OFFSET & 0x0F)); /* low column addr  */
-    Oled_WriteCommand(0x10 + (OLED_COL_OFFSET >> 4));   /* high column addr */
-    Oled_WriteCommand(0x81); /* contrast control                 */
-    Oled_WriteCommand(0x80);
-    Oled_WriteCommand(0xA1); /* segment re-map                   */
-    Oled_WriteCommand(0xA6); /* normal (not inverted) display    */
-    Oled_WriteCommand(0xA8); /* multiplex ratio                  */
-    Oled_WriteCommand(0x3F); /* -> 1/64 duty (64-row panel)       */
-    Oled_WriteCommand(0xA4); /* resume RAM content display       */
-    Oled_WriteCommand(0xD3); /* display offset                   */
-    Oled_WriteCommand(0x00);
-    Oled_WriteCommand(0xD5); /* display clock divide ratio       */
-    Oled_WriteCommand(0x80);
-    Oled_WriteCommand(0xD9); /* pre-charge period                */
-    Oled_WriteCommand(0x22);
-    Oled_WriteCommand(0xDA); /* COM pins hardware configuration  */
-    Oled_WriteCommand(0x12);
-    Oled_WriteCommand(0xDB); /* VCOMH deselect level              */
-    Oled_WriteCommand(0x40);
-    Oled_WriteCommand(0xAD); /* DC-DC control (SH1106 charge pump)*/
-    Oled_WriteCommand(0x8B); /* -> enable internal DC-DC          */
-    Oled_WriteCommand(0xAF); /* display ON                       */
-    Oled_Clear();
-}
 
-void Oled_Clear(void)
-{
-    memset(Oled_Buffer, 0x00, sizeof(Oled_Buffer));//void *memset(void *ptr, int value, size_t num);
-    Oled_UpdateScreen();
-}
- 
+// STRUCT DEFINITIONS
 typedef struct {
     char ch;
     uint8_t cols[5];
@@ -119,6 +63,30 @@ static const Oled_Glyph_t Oled_Font[] = {
     { '9', { 0x06, 0x49, 0x49, 0x29, 0x1E } },
     { 'x', { 0x44, 0x28, 0x10, 0x28, 0x44 } },
 };
+
+
+// FUNCTION DEFINITIONS
+static void Oled_WriteCommand(uint8_t cmd)
+{
+    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_CMD_MODE,
+                       I2C_MEMADD_SIZE_8BIT, &cmd, 1,HAL_MAX_DELAY);
+} //lệnh điều chỉnh cưởng độ sáng .....
+
+static void Oled_WriteData(const uint8_t *data, uint16_t size)
+{
+    HAL_I2C_Mem_Write(Oled_Handle, OLED_I2C_ADDR, OLED_DATA_MODE,
+                       I2C_MEMADD_SIZE_8BIT, (uint8_t *)data, size,HAL_MAX_DELAY);
+} //lệnh bật tắt pixel, ghi thẳng vào RAM
+
+static void Oled_UpdateScreen(void)
+{
+    for (uint8_t page = 0; page < OLED_PAGES; page++) {
+        Oled_WriteCommand(0xB0 + page);                            /* set page address    */
+        Oled_WriteCommand(0x00 + (OLED_COL_OFFSET & 0x0F));         /* lower column nibble */
+        Oled_WriteCommand(0x10 + (OLED_COL_OFFSET >> 4));           /* higher column nibble*/
+        Oled_WriteData(&Oled_Buffer[page * OLED_WIDTH], OLED_WIDTH);
+    }
+}
 
 static const Oled_Glyph_t *Oled_FindGlyph(char ch)
 {
@@ -176,7 +144,45 @@ static void Oled_DrawLineCentered(const char *str, int16_t y0, uint8_t scale)
     }
 }// căn giữa
 
-static void Oled_ShowLines(const char *line1, uint8_t scale1,
+void Oled_Init(I2C_HandleTypeDef *i2c) {
+    Oled_Handle = i2c;
+    /* Standard SH1106 1.3" power-on sequence. */
+    Oled_WriteCommand(0xAE); /* display off                      */
+    Oled_WriteCommand(0x40); /* start line address = 0           */
+    Oled_WriteCommand(0xB0); /* page start address               */
+    Oled_WriteCommand(0xC8); /* COM output scan direction, remap */
+    Oled_WriteCommand(0x00 + (OLED_COL_OFFSET & 0x0F)); /* low column addr  */
+    Oled_WriteCommand(0x10 + (OLED_COL_OFFSET >> 4));   /* high column addr */
+    Oled_WriteCommand(0x81); /* contrast control                 */
+    Oled_WriteCommand(0x80);
+    Oled_WriteCommand(0xA1); /* segment re-map                   */
+    Oled_WriteCommand(0xA6); /* normal (not inverted) display    */
+    Oled_WriteCommand(0xA8); /* multiplex ratio                  */
+    Oled_WriteCommand(0x3F); /* -> 1/64 duty (64-row panel)       */
+    Oled_WriteCommand(0xA4); /* resume RAM content display       */
+    Oled_WriteCommand(0xD3); /* display offset                   */
+    Oled_WriteCommand(0x00);
+    Oled_WriteCommand(0xD5); /* display clock divide ratio       */
+    Oled_WriteCommand(0x80);
+    Oled_WriteCommand(0xD9); /* pre-charge period                */
+    Oled_WriteCommand(0x22);
+    Oled_WriteCommand(0xDA); /* COM pins hardware configuration  */
+    Oled_WriteCommand(0x12);
+    Oled_WriteCommand(0xDB); /* VCOMH deselect level              */
+    Oled_WriteCommand(0x40);
+    Oled_WriteCommand(0xAD); /* DC-DC control (SH1106 charge pump)*/
+    Oled_WriteCommand(0x8B); /* -> enable internal DC-DC          */
+    Oled_WriteCommand(0xAF); /* display ON                       */
+    Oled_Clear();
+}
+
+void Oled_Clear(void)
+{
+    memset(Oled_Buffer, 0x00, sizeof(Oled_Buffer));//void *memset(void *ptr, int value, size_t num);
+    Oled_UpdateScreen();
+}
+
+void Oled_ShowLines(const char *line1, uint8_t scale1,
                             const char *line2, uint8_t scale2)
 {
     memset(Oled_Buffer, 0x00, sizeof(Oled_Buffer));
@@ -195,72 +201,6 @@ static void Oled_ShowLines(const char *line1, uint8_t scale1,
     Oled_UpdateScreen();
 }
  
-void Oled_ShowStatus(Oled_Msg_t msg)
-{
-    switch (msg) {
-        case OLED_MSG_SCANNING:
-            Oled_ShowLines("Scanning!", 2, NULL, 0);
-            break;
-        case OLED_MSG_WELCOME:
-            Oled_ShowLines("Welcome!", 2, NULL, 0);
-            break;
-        case OLED_MSG_DENIED:
-            Oled_ShowLines("Denied!", 2, NULL, 0);
-            break;
-        case OLED_MSG_ADMIN_MENU:
-            Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
-            break;
-        case OLED_MSG_SCAN_ADD_CARD:
-            Oled_ShowLines("Scan", 2, "to add!", 2);
-            break;
-        case OLED_MSG_ERROR:
-            Oled_ShowLines("Error!", 2, NULL, 0);
-            break;
-        case OLED_MSG_SCAN_DELETE_CARD:
-            Oled_ShowLines("Scan", 2, "to delete!", 2);
-            break;
-        case OLED_MSG_CARD_EXISTS:
-            Oled_ShowLines("Card", 2, "Exists!", 2);
-            break;
-        case OLED_MSG_CARD_ADDED:
-            Oled_ShowLines("Card", 2, "Added!", 2);
-            break;
-        case OLED_MSG_CARD_DELETED:
-            Oled_ShowLines("Card", 2, "Deleted!", 2);
-            break;
-        case OLED_MSG_NOT_FOUND:
-            Oled_ShowLines("Not Found!", 2, NULL, 0);
-            break;
-        case OLED_MSG_ADMIN_CARD:
-            Oled_ShowLines("No Delete", 2, "Admin!", 2);
-            break;
-        case OLED_MSG_PASSWORD_INPUT:
-            Oled_ShowLines("Enter Code", 2, NULL, 0);
-            break;
-        case OLED_MSG_LOCKED:
-            Oled_ShowLines("Secure!", 2, NULL, 0);
-            break;
-        case OLED_MSG_SCAN_NEW_ADMIN:
-        case OLED_MSG_SCAN_DEL_ADMIN:
-            Oled_ShowLines("Scan", 2, "Admin!", 2);
-            break;
-        case OLED_MSG_ADMIN_ADDED:
-            Oled_ShowLines("Admin", 2, "Added!", 2);
-            break;
-        case OLED_MSG_ADMIN_DELETED:
-            Oled_ShowLines("Admin", 2, "Deleted!", 2);
-            break;
-        case OLED_MSG_ADMIN_CHANGE_DENIED:
-            Oled_ShowLines("Admin", 2, "Denied!", 2);
-            break;
-        default:
-            Oled_ShowLines("Scanning!", 2, NULL, 0);
-            break;
-    }
-}
-
-
-// Nhung ham moi
 void Oled_ShowPasswordMask(uint8_t length) {
     char mask[9]; // Toi da 8 ky tu mat khau
     if (length > 8) length = 8;
