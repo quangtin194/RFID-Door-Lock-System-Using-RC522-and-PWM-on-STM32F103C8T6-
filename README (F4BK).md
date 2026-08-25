@@ -165,7 +165,7 @@ Full state diagram: [`F4BK_FSM.PNG`](Docs/F4BK_FSM.PNG) *(currently being redraw
 
 ## 8. Demo Output
 
-Demo video of the working system: `Demo.mp4` [link in the project outline/Repo](https://drive.google.com/drive/folders/1_YqO5p5l2FvDE9-LVP3X7nNv4l6zU97B)
+Demo video of the working system: `Demo.mp4` [link in the project outline/Repo](https://youtube.com/watch?v=keH3I--v1AQ&si=Gdj_lMe266tv9noc)
 
 **Photos of the assembled physical model:**
 
