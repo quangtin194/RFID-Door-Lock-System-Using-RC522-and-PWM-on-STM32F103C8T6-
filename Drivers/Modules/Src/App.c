@@ -10,7 +10,6 @@ static uint32_t Deny_start_time = 0;
 static uint32_t Timeout_counter;
 static RC522_Status_t rc522Status;
 static UID_Status_t uidStatus;
-static Oled_Msg_t oled_status;
 static volatile uint8_t keypad_event;
 
 static uint8_t Lock_Level = 0;        // So lan bi khoa lien tiep
@@ -65,8 +64,7 @@ void App_Run(void) {
                 Keypad_EnableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_off();
-                oled_status = OLED_MSG_SCANNING;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Scanning!", 2, NULL, 0);
                 break;
 
             case VERIFY_UID:
@@ -75,32 +73,28 @@ void App_Run(void) {
 
             case PASSWORD_INPUT:
                 Keypad_EnableEXTI();    
-                oled_status = OLED_MSG_PASSWORD_INPUT;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Enter Code", 2, NULL, 0);
                 UART_PC_Print("Enter password\n");
                 break;
 
             case ADMIN_MODE:
                 Keypad_EnableEXTI(); 
                 Servo_SetAngle(OPEN_ANGLE);
-                oled_status = OLED_MSG_ADMIN_MENU;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
                 UART_PC_Print("Admin mode\n");
                 break;
 
             case ACCESS_ALLOWED:
                 Keypad_DisableEXTI();
                 Servo_SetAngle(OPEN_ANGLE);
-                oled_status = OLED_MSG_WELCOME;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Welcome!", 2, NULL, 0);
                 UART_PC_Print("Welcome ID: ");
                 UART_Print_UID();
                 break;
 
             case ACCESS_DENIED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_DENIED;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Denied!", 2, NULL, 0);
                 Buzzer_on();
                 UART_PC_Print("Denied ID: ");
                 UART_Print_UID();
@@ -124,36 +118,31 @@ void App_Run(void) {
 
             case ADD_CARD:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_SCAN_ADD_CARD;
-                Oled_ShowStatus(OLED_MSG_SCAN_ADD_CARD);
+                Oled_ShowLines("Scan", 2, "to add!", 2);
                 UART_PC_Print("Add card\n");
                 break;
 
             case DELETE_CARD:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_SCAN_DELETE_CARD;
-                Oled_ShowStatus(OLED_MSG_SCAN_DELETE_CARD);
+                Oled_ShowLines("Scan", 2, "to delete!", 2);
                 UART_PC_Print("Delete card\n");
                 break;
 
             case ADD_ADMIN_CARD:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_SCAN_NEW_ADMIN;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Scan to", 2, "add Admin!", 2);
                 UART_PC_Print("Scan to add AD\n");
                 break;
 
             case DEL_ADMIN_CARD:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_SCAN_DEL_ADMIN;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Scan to", 2, "del Admin!", 2);
                 UART_PC_Print("Scan to delete AD\n");
                 break;
 
             case CARD_ADDED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_CARD_ADDED;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Card", 2, "Added!", 2);
                 UART_PC_Print("Save ID: ");
                 UART_Print_UID();
                 Flash_Print_Cards_UART();   
@@ -161,15 +150,13 @@ void App_Run(void) {
 
             case CARD_EXISTS:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_CARD_EXISTS;
-                Oled_ShowStatus(oled_status);
+                 Oled_ShowLines("Card", 2, "Exists!", 2);
                 UART_PC_Print("Card exists\n");
                 break;
 
             case CARD_DELETED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_CARD_DELETED;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Card", 2, "Deleted!", 2);
                 UART_PC_Print("Delete ID: ");
                 UART_Print_UID();
                 break;
@@ -178,36 +165,31 @@ void App_Run(void) {
                 Keypad_DisableEXTI();
                 if (uidStatus == UID_NEW) 
                 {
-                    oled_status = OLED_MSG_NOT_FOUND;
-                    Oled_ShowStatus(oled_status);
+                    Oled_ShowLines("Not Found!", 2, NULL, 0);
                     UART_PC_Print("UID Not found\n");
                 }
                 else if (uidStatus == UID_ADMIN) 
                 {
-                    oled_status = OLED_MSG_ADMIN_CARD;
-                    Oled_ShowStatus(oled_status);
+                    Oled_ShowLines("No Delete", 2, "Admin!", 2);
                     UART_PC_Print("Cannot delete Admin card\n");
                 }
                 break;
 
             case ADMIN_ADDED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_ADMIN_ADDED;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Admin", 2, "Added!", 2);
                 UART_PC_Print("New Admin card added\n");
                 break;
 
             case ADMIN_DELETED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_ADMIN_DELETED;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Admin", 2, "Deleted!", 2);
                 UART_PC_Print("Old Admin card deleted\n");
                 break;
 
             case ADMIN_CHANGE_DENIED:
                 Keypad_DisableEXTI();
-                oled_status = OLED_MSG_ADMIN_CHANGE_DENIED;
-                Oled_ShowStatus(oled_status);
+                Oled_ShowLines("Admin", 2, "Denied!", 2);
                 UART_PC_Print("Cannot change admin card\n");
                 break;
 
@@ -215,9 +197,8 @@ void App_Run(void) {
                 Keypad_DisableEXTI();
                 Servo_SetAngle(CLOSE_ANGLE);
                 Buzzer_on();
+                Oled_ShowLines("Error!", 2, NULL, 0);
                 UART_PC_Print("ERROR\n");
-                oled_status = OLED_MSG_ERROR;
-                Oled_ShowStatus(OLED_MSG_ERROR);
                 break;
 
             default:
@@ -390,7 +371,6 @@ void App_Run(void) {
                     else appState = ADMIN_CHANGE_DENIED; 
                 }
                 else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-                Timeout_counter = HAL_GetTick();
             }
             break;
 
@@ -406,7 +386,6 @@ void App_Run(void) {
                     else appState = ADMIN_CHANGE_DENIED; 
                 }
                 else if (rc522Status == RC522_ERROR) appState = ERROR_STATE;
-                Timeout_counter = HAL_GetTick();
             }
             break;
 
