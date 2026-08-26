@@ -1,6 +1,5 @@
 // INCLUDE & DEFINE
 #include "UART.h"
-#include "RC522.h"
 
 // VARIABLE DEFINITIONS
 static UART_HandleTypeDef *UART_Handle = NULL;

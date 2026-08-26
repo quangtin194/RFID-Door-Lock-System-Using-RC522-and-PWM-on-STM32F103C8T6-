@@ -14,8 +14,7 @@ static volatile uint8_t keypad_event;
 
 static uint8_t Lock_Level = 0;     // So lan bi khoa lien tiep
 static uint32_t Lock_Duration = 0; // Thoi gian khoa hien tai (ms)
-static uint32_t Last_Lock_Second =
-    0; // Giay cuoi cung da hien thi (tranh ve OLED lien tuc)
+static uint32_t Last_Lock_Second = 0; // Giay cuoi cung da hien thi (tranh ve OLED lien tuc)
 
 // XU LY NGAT EXTI
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -102,8 +101,7 @@ void App_Run(void) {
       Timeout_counter = HAL_GetTick();
       Last_Lock_Second = 0;
 
-      Oled_ShowLockCountdown(Lock_Duration /
-                             1000); // Hiển thị CountDown trên OLED
+      Oled_ShowLockCountdown(Lock_Duration / 1000); // Hiển thị CountDown trên OLED
       UART_PC_Print("System locked\n");
       break;
 
@@ -275,16 +273,6 @@ void App_Run(void) {
     }
     break;
 
-  case ACCESS_ALLOWED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
-  case ACCESS_DENIED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case LOCKED: {
     uint32_t elapsed = HAL_GetTick() - Timeout_counter;
     if (elapsed >= Lock_Duration) {
@@ -364,36 +352,14 @@ void App_Run(void) {
     }
     break;
 
+  case ACCESS_ALLOWED:
+  case ACCESS_DENIED:
   case CARD_ADDED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case CARD_EXISTS:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case CARD_DELETED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case DELETE_DENIED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case ADMIN_ADDED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case ADMIN_DELETED:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
-      appState = IDLE;
-    break;
-
   case ADMIN_CHANGE_DENIED:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
       appState = IDLE;

@@ -1,14 +1,11 @@
 // INCLUDE & DEFINE
 #include "Keypad.h"
-#include "stm32f103xb.h"
-#include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_gpio.h"
-#include <stdint.h>
+
+#define PASSWORD_LENGTH 4
 
 // VARIABLE DEFINITIONS
 Keypad_t Keypad_Handle;
 
-#define PASSWORD_LENGTH 4
 static uint8_t Password_Buffer[PASSWORD_LENGTH] = {0};
 static uint8_t Password_Index = 0;
 static const uint8_t Password_Store[PASSWORD_LENGTH] = {1, 2, 3, 4}; // pass:1234
@@ -40,11 +37,13 @@ Key_t Keypad_Scan(void) {
   GPIO_TypeDef *colPorts[KEYPAD_COLS] = {Keypad_Handle.Col1_Port,
                                          Keypad_Handle.Col2_Port,
                                          Keypad_Handle.Col3_Port};
+
   uint16_t rowPins[KEYPAD_ROWS] = {
       Keypad_Handle.Row1_Pin, Keypad_Handle.Row2_Pin, Keypad_Handle.Row3_Pin,
       Keypad_Handle.Row4_Pin};
   uint16_t colPins[KEYPAD_COLS] = {
       Keypad_Handle.Col1_Pin, Keypad_Handle.Col2_Pin, Keypad_Handle.Col3_Pin};
+      
   Key_t keyMatrix[KEYPAD_ROWS][KEYPAD_COLS] = {
       {KEY_1, KEY_2, KEY_3},
       {KEY_4, KEY_5, KEY_6},
@@ -90,12 +89,11 @@ Key_t Keypad_Scan(void) {
   Keypad_EnableEXTI();
   return key;
 }
+
 void Keypad_Password_Append(Key_t key) {
-  if (key < KEY_0 || key > KEY_9)
-    return;
   if (Password_Index >= PASSWORD_LENGTH)
     return;
-  Password_Buffer[Password_Index++] = (uint8_t)(key - KEY_0);
+  Password_Buffer[Password_Index++] = (uint8_t)(key);
 }
 
 void Keypad_Password_Del(void) {
