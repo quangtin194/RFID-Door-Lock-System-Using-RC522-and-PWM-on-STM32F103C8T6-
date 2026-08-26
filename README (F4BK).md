@@ -28,47 +28,22 @@ The system authenticates users through **two methods**: tapping an RFID card (vi
 ## 2. System Architecture
 
 ![F4BK System Diagram](./images/systemdia.png)
-
-```
-        ┌─────────────┐      SPI       ┌───────────────────────────┐
-        │   RC522     │◄──────────────►│                           │
-        │ (RFID card) │                │                           │
-        └─────────────┘                │                           │
-                                        │                           │
-        ┌─────────────┐   GPIO/EXTI    │   STM32F103C8T6           │
-        │   Keypad    │◄──────────────►│   (Blue Pill)             │
-        │ (password)  │                │                           │
-        └─────────────┘                │   App.c — main FSM        │
-                                        │                           │
-                                        │───► PWM  ──► SG90 Servo (open/close door)
-                                        │───► I2C  ──► OLED SH1106
-                                        │───► GPIO ──► Buzzer (alert)
-                                        │───► TIMER──► Auto door-close
-                                        │───► UART ──► PC (Hercules / log)
-                                        └───────────────────────────┘
-```
-
 ## 3. Repository Structure
 
-| Component | Role | Owner | Status |
-|---|---|---|---|
-| `Core/Src/App.c`, `App.h` | Main operation flow (FSM), coordinates all modules | Quang Tin | Done |
-| `Core/Src/RC522.c/.h` | Reads RFID card UID via SPI, stores UID hardcoded in Flash | Duc Thinh | Done |
-| `Core/Src/OLED.c/.h` | Displays status (Welcome/Denied/Card Exists/Error...) via I2C | Tan Nghiem | Done |
-| `Core/Src/Servo.c/.h` | Controls the SG90 servo via PWM | Tan Nghiem | Done |
-| `Core/Src/Buzzer.c/.h` | Alerts via buzzer through GPIO | Duc Thinh | Done |
-| `Core/Src/UART.c/.h` | Sends UID + access status logs to the PC | Hoang Tam | Done |
-| `Core/Src/Keypad.c/.h` *(extended version)* | Password entry, access to Admin modes via EXTI | Tan Nghiem | Done |
-| `Core/Src/Button.c/.h` *(original version)* | Standalone push buttons to add/remove cards via EXTI | Hoang Tam | Used only in the earlier version, replaced by Keypad in the extended version |
-| `Docs/F4BK_SYSTEM_DIAGRAM` | System block diagram | Quang Tin | Done |
-| `Docs/F4BK_FSM.PNG` | State diagram (FSM) | Tan Nghiem | Done |
-| `Docs/F4BK_SƠ ĐỒ CHÂN STM32.jpg` | Microcontroller pin mapping diagram | Quang Tin | Done |
-| `Hardware/` (PCB, KiCad) | Schematic & PCB design | Hoang Tam | Done |
-| `Readme` | README file | Tan Nghiem, Duc Thinh | Done |
+| Component       | Content                                                       |
+|-----------------|------------------------------------------------------------------|
+| `Core/`         | Main source code and configuration of the STM32 project          |
+| `Core/Inc/`     | Header `.h` files                                                 |
+| `Core/Src/`     | Source `.c` files                                                 |
+| `Drivers/`      | Drivers/libraries for interfacing with peripherals                |
+| `App/`          | Business logic of the door access control system                 |
+| `App/RFID/`     | RC522 handling, reading and verifying UID                         |
+| `App/Keypad/`   | Keypad handling and PIN entry                                     |
+| `App/Servo/`    | Servo control via PWM                                             |
 
 ## 4. Main Logic / FSM & Response Levels
 
-Full state diagram: [`F4BK_FSM.PNG`](Docs/F4BK_FSM.PNG) *(currently being redrawn for the extended version)*.
+Full state diagram: [`F4BK_FSM.PNG`](https://drive.google.com/file/d/14dICIdWbOcxtWcCkS_937QGVBvgwX4nr/view?usp=sharing)
 
 **Three main authentication sources feeding into the FSM:**
 
@@ -138,9 +113,6 @@ Full state diagram: [`F4BK_FSM.PNG`](Docs/F4BK_FSM.PNG) *(currently being redraw
 **SPI ↔ RC522:** reads the RFID card UID within a range of ~2–5 cm.
 
 **I2C ↔ OLED:** displays status according to each FSM state (I2C address and speed configured in `OLED.h`).
-
-**GPIO/EXTI ↔ Keypad/Button:** external interrupt triggered when a key is pressed; the microcontroller scans to determine the corresponding key.
-
 > For detailed UART data frame format and specific pin mapping, see [`Docs/F4BK_SƠ ĐỒ CHÂN STM32.jpg`](https://drive.google.com/file/d/19UpyDO7NRIW5suYX4cPgtHUJO4FrxmLx/view?usp=sharing).
 
 ## 7. Getting Started
@@ -195,8 +167,6 @@ Demo video of the working system: `Demo.mp4` [link in the project outline/Repo](
 ## 10. Known Gaps
 - **No cloud/server connection or remote management app** — this is an intentional scope limitation, not an oversight.
 - **No real electromagnetic lock used** — the SG90 servo only simulates the locking mechanism and does not represent real-world locking force.
-- The FSM diagram (`F4BK_FSM.PNG`) is currently being redrawn to reflect the new `LOCKED`/`Error` states of the extended version — the current version in the repo may not be fully up to date.
-
 ## 11. Team
 
 **Team F4BK (Group 7):**
