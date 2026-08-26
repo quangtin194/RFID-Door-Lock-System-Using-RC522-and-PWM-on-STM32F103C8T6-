@@ -5,12 +5,13 @@
 #include "stm32f1xx_hal.h"
 #include <stdint.h>
 #include <stm32f103xb.h>
+#include "stm32f1xx_hal_gpio.h"
 
 #define KEYPAD_ROWS 4
 #define KEYPAD_COLS 3
+
 // ENUM DEFINITIONS
 typedef enum {
-  KEY_NONE,
   KEY_0,
   KEY_1,
   KEY_2,
@@ -22,7 +23,9 @@ typedef enum {
   KEY_8,
   KEY_9,
   KEY_THANG,
-  KEY_SAO
+  KEY_SAO,
+  KEY_NONE
+
 } Key_t;
 
 // STRUCT DEFINITIONS
@@ -45,6 +48,7 @@ typedef struct {
   uint16_t Row2_Pin;
   uint16_t Row3_Pin;
   uint16_t Row4_Pin;
+  
 } Keypad_t;
 
 extern Keypad_t Keypad_Handle;
