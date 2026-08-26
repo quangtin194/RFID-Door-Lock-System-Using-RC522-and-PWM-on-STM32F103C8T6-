@@ -30,16 +30,16 @@ The system authenticates users through **two methods**: tapping an RFID card (vi
 ![F4BK System Diagram](./images/systemdia.png)
 ## 3. Repository Structure
 
-| Thành phần      | Nội dung                                                    |
-|-----------------|--------------------------------------------------------------|
-| `Core/`         | Mã nguồn và cấu hình chính của project STM32                |
-| `Core/Inc/`     | Các file header `.h`                                         |
-| `Core/Src/`     | Các file source `.c`                                          |
-| `Drivers/`      | Driver/thư viện giao tiếp với các ngoại vi                   |
-| `App/`          | Logic nghiệp vụ của hệ thống kiểm soát cửa                    |
-| `App/RFID/`     | Xử lý RC522, đọc và xác thực UID                              |
-| `App/Keypad/`   | Xử lý keypad và nhập PIN                                      |
-| `App/Servo/`    | Điều khiển servo bằng PWM                                     |
+| Component       | Content                                                       |
+|-----------------|------------------------------------------------------------------|
+| `Core/`         | Main source code and configuration of the STM32 project          |
+| `Core/Inc/`     | Header `.h` files                                                 |
+| `Core/Src/`     | Source `.c` files                                                 |
+| `Drivers/`      | Drivers/libraries for interfacing with peripherals                |
+| `App/`          | Business logic of the door access control system                 |
+| `App/RFID/`     | RC522 handling, reading and verifying UID                         |
+| `App/Keypad/`   | Keypad handling and PIN entry                                     |
+| `App/Servo/`    | Servo control via PWM                                             |
 
 ## 4. Main Logic / FSM & Response Levels
 
