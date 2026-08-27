@@ -1,6 +1,5 @@
 // INCLUDE & DEFINE
 #include "Oled.h"
-#include "string.h"
 
 #define OLED_CMD_MODE 0x00  /* control byte: next byte(s) = command */
 #define OLED_DATA_MODE 0x40 /* control byte: next byte(s) = data    */
@@ -127,8 +126,7 @@ static uint16_t Oled_TextWidth(const char *str, uint8_t scale) {
 static void Oled_DrawLineCentered(const char *str, int16_t y0, uint8_t scale) {
   uint16_t w = Oled_TextWidth(str, scale);
   int16_t x = (OLED_WIDTH - (int16_t)w) / 2;
-  if (x < 0)
-    x = 0;
+  if (x < 0) x = 0;
 
   for (const char *p = str; *p != '\0'; p++) {
     Oled_DrawChar(x, y0, *p, scale);
@@ -193,8 +191,7 @@ void Oled_ShowLines(const char *line1, uint8_t scale1, const char *line2,
 
 void Oled_ShowPasswordMask(uint8_t length) {
   char mask[9];
-  if (length > 8)
-    length = 8;
+  if (length > 8) length = 8;
 
   for (uint8_t i = 0; i < length; i++) {
     mask[i] = '*';
