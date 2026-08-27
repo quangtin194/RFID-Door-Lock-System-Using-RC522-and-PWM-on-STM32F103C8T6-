@@ -221,8 +221,7 @@ void App_Run(void) {
     } else if (uidStatus == UID_INVALID) {
       if (Deny_counter == 0)
         Deny_start_time = HAL_GetTick();
-      if (HAL_GetTick() - Deny_start_time > SPAM_TIME)
-        Deny_counter = 0;
+      if (HAL_GetTick() - Deny_start_time > SPAM_TIME) Deny_counter = 0;
 
       Deny_counter++;
 
@@ -273,7 +272,7 @@ void App_Run(void) {
     }
     break;
 
-  case LOCKED: {
+  case LOCKED: 
     uint32_t elapsed = HAL_GetTick() - Timeout_counter;
     if (elapsed >= Lock_Duration) {
       appState = IDLE;
@@ -286,7 +285,6 @@ void App_Run(void) {
       }
     }
     break;
-  }
 
   case ADD_CARD:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)

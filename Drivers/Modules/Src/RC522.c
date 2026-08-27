@@ -1,24 +1,20 @@
 // INCLUDE & DEFINE
 #include "RC522.h"
-#include "UART.h"      
-#include <stdio.h>    
-#include <string.h>  
 
-#define PICC_REQIDL    0x26
+#define PICC_REQIDL    0x26   //  Cmd yeu cau the phan hoi 
 #define FLASH_USER_START_ADDR   0x0800FC00
 #define MAX_CARDS 5
 #define MAX_ADMINS 3
-#define FLASH_XOR_KEY 0x3C5A96F1 
+#define FLASH_XOR_KEY 0x3C5A96F1
 
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
-uint8_t CurrentUID[5]; // Present UID
-uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};  // Admin Card UID
-uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user
+uint8_t CurrentUID[5];                             // Present UID
+uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};    // Admin Card UID
+uint8_t AuthorizedCards[MAX_CARDS][4] = {0};       // Array to store authorized user
 uint8_t CardCount = 0;
 uint8_t AdminUIDs[MAX_ADMINS][4]; 
 uint8_t AdminCount = 0;
-//  card UIDs
 
 // FUNCTION DEFINITIONS
 void RC522_Init(SPI_HandleTypeDef *spi) {
@@ -26,7 +22,7 @@ void RC522_Init(SPI_HandleTypeDef *spi) {
     TM_MFRC522_Init();
 }
 
-uint8_t Is_Admin_Card(uint8_t *uid) {
+static uint8_t Is_Admin_Card(uint8_t *uid) {
     if (memcmp(uid, AdminUID, 4) == 0) {
         return 1;
     }
