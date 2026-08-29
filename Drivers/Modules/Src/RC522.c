@@ -162,7 +162,6 @@ void Flash_Print_Cards_UART(void) {
 }
 
 UID_Status_t RC522_UID_Add(void) {
-    if (CardCount >= MAX_CARDS) return UID_INVALID;
     if(Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN; 
     }
@@ -275,6 +274,20 @@ UID_Status_t RC522_UID_AddAD(void) {
         }
         if (memcmp(CurrentUID, AdminUIDs[i], 4) == 0) {
             return UID_EXIST; 
+        }
+    }
+    for(int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] == 0x00 && AuthorizedCards[i][1] == 0x00 && 
+            AuthorizedCards[i][2] == 0x00 && AuthorizedCards[i][3] == 0x00) {
+            continue;
+        }
+        if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
+            memset(AuthorizedCards[i], 0x00, 4);
+            CardCount = 0;
+            for (int k = 0; k < MAX_CARDS; k++) {
+                if (AuthorizedCards[k][0] != 0x00) CardCount++; 
+            }
+            break; 
         }
     }
     for (int i = 0; i < MAX_ADMINS; i++) {
