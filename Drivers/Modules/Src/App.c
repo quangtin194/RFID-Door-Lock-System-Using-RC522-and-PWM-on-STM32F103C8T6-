@@ -1,5 +1,6 @@
 // INCLUDE & DEFINE
 #include "App.h"
+#include "Keypad.h"
 
 // VARIABLE DEFINITIONS
 static volatile AppState_t appState;
@@ -120,34 +121,34 @@ void App_Run(void) {
     case ADD_MENU:
       Keypad_EnableEXTI();
       Oled_ShowLines("Add", 2, "1:Card 2:Admin", 1);
-      UART_PC_Print("Add menu: 1=AC (the thuong) 2=AA (the admin), # de quay lai\n");
+      UART_PC_Print("Add menu: 1=AC (user card) 2=AA (admin card), # to return\n");
       break;
 
     case DELETE_MENU:
       Keypad_EnableEXTI();
       Oled_ShowLines("Delete", 2, "1:Card 2:Admin 3:List", 1);
-      UART_PC_Print("Delete menu: 1=DC (scan the) 2=DA (scan admin) 3=DU (danh sach), # de quay lai\n");
+      UART_PC_Print("Delete menu: 1=DC (scan card) 2=DA (scan admin) 3=DU (list), # to return\n");
       break;
     
     case DELETE_UID_LIST:
       Keypad_EnableEXTI();
       Selected_Slot = SLOT_NONE;
       Oled_ShowLines("Del", 2, "in uart", 2);
-      UART_PC_Print("DU - Xoa UID theo danh sach, khong can the:\n");
+      UART_PC_Print("DU - Delete UID from list, no card required:\n");
       Print_Card_List_UART();
       break;
 
     case UID_SLOT_DELETED:
       Keypad_DisableEXTI();
       Oled_ShowLines("Slot", 2, "Cleared!", 2);
-      UART_PC_Print("Da xoa UID tai slot da chon \n");
+      UART_PC_Print("Deleted UID at selected slot \n");
       Flash_Print_Cards_UART();
       break;
     
     case UID_SLOT_EMPTY:
       Keypad_DisableEXTI();
       Oled_ShowLines("Slot", 2, "None!", 2);
-      UART_PC_Print("Slot da chon, trong! \n");
+      UART_PC_Print("Selected slot is empty! \n");
       break;
     
     case ADD_ADMIN_CARD:
@@ -341,7 +342,7 @@ void App_Run(void) {
       Selected_Slot = (uint8_t)(key - KEY_1);
       Print_Selected_Slot_UART();
       Timeout_counter = HAL_GetTick();
-    } else if (key == KEY_SAO) {
+    } else if (key == KEY_THANG) {
       // Bam * de xac nhan xoa UID tai slot da chon
       if (Selected_Slot != SLOT_NONE) {
         if (Selected_Slot < MAX_CARDS)
@@ -353,8 +354,10 @@ void App_Run(void) {
           appState = UID_SLOT_DELETED;
         else
           appState = UID_SLOT_EMPTY;
+
+        Timeout_counter = HAL_GetTick();
       }
-    } else if (key == KEY_THANG) {
+    } else if (key == KEY_SAO) {
       appState = DELETE_MENU;
       Timeout_counter = HAL_GetTick();
     }
@@ -448,6 +451,8 @@ void App_Run(void) {
   case ADMIN_ADDED:
   case ADMIN_DELETED:
   case ADMIN_CHANGE_DENIED:
+  case UID_SLOT_DELETED:
+  case UID_SLOT_EMPTY:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
       appState = IDLE;
     break;

@@ -363,12 +363,12 @@ uint8_t RC522_GetAdminUID(uint8_t index, uint8_t *uid_out) {
 void Print_Card_List_UART(void) {
     char buf[64];
     uint8_t uid[4];
-    UART_PC_Print("--- Danh sach the (bam so, roi bam * de xoa) ---\r\n");
+    UART_PC_Print("--- Card List (press number, then * to delete) ---\r\n");
 
     for (uint8_t i = 0; i < MAX_CARDS; i++) {
         RC522_GetCardUID(i, uid);
         if (uid[0] == 0x00 && uid[1] == 0x00 && uid[2] == 0x00 && uid[3] == 0x00) {
-            sprintf(buf, "%d) Card: (trong)\r\n", i + 1);
+            sprintf(buf, "%d) Card: (empty)\r\n", i + 1);
         } else {
             sprintf(buf, "%d) Card: %02X %02X %02X %02X\r\n", i + 1,
                     uid[0], uid[1], uid[2], uid[3]);
@@ -379,7 +379,7 @@ void Print_Card_List_UART(void) {
     for (uint8_t i = 0; i < MAX_ADMINS; i++) {
         RC522_GetAdminUID(i, uid);
         if (uid[0] == 0x00 && uid[1] == 0x00 && uid[2] == 0x00 && uid[3] == 0x00) {
-            sprintf(buf, "%d) Admin: (trong)\r\n", MAX_CARDS + i + 1);
+            sprintf(buf, "%d) Admin: (empty)\r\n", MAX_CARDS + i + 1);
         } else {
             sprintf(buf, "%d) Admin: %02X %02X %02X %02X\r\n", MAX_CARDS + i + 1,
                     uid[0], uid[1], uid[2], uid[3]);
@@ -407,9 +407,9 @@ void Print_Selected_Slot_UART(void) {
     }
 
     if (uid[0] == 0x00 && uid[1] == 0x00 && uid[2] == 0x00 && uid[3] == 0x00) {
-        sprintf(buf, "Da chon %s %d: (trong) - bam * de xac nhan\r\n", type, Selected_Slot + 1);
+        sprintf(buf, "Selected %s %d: (empty) - press * to confirm\r\n", type, Selected_Slot + 1);
     } else {
-        sprintf(buf, "Da chon %s %d: %02X %02X %02X %02X - bam * de xac nhan\r\n",
+        sprintf(buf, "Selected %s %d: %02X %02X %02X %02X - press * to confirm\r\n",
                 type, Selected_Slot + 1, uid[0], uid[1], uid[2], uid[3]);
     }
     UART_PC_Print(buf);
