@@ -48,6 +48,22 @@
         return 0; 
     }
 
+    // Dua the ve trang thai ACTIVE lai (HALT -> WUPA -> Anticoll -> Select).
+    // Dung de thu lai auth bang key khac khi lan auth truoc that bai.
+    static TM_MFRC522_Status_t RC522_ReactivateCard(uint8_t *uid) {
+        uint8_t respond[2];
+        uint8_t serNum[5];
+        TM_MFRC522_Status_t st;
+
+        TM_MFRC522_Halt();                              // Bo qua ket qua (the co the da roi truong)
+        st = TM_MFRC522_Request(PICC_REQALL, respond);  // WUPA 0x52 danh thuc the dang HALT
+        if (st != MI_OK) return st;
+        st = TM_MFRC522_Anticoll(serNum);
+        if (st != MI_OK) return st;
+        memcpy(uid, serNum, 4);                         // Cap nhat lai UID thuc te
+        return TM_MFRC522_SelectTag(uid);
+    }
+
     // Ghi ma bao mat va key rieng vao the (goi khi them the AC/AA).
     // Ho tro ca the moi (key mac dinh) va the da nap ma (key rieng).
     static TM_MFRC522_Status_t RC522_WriteSecCode(uint8_t *uid) {
@@ -61,6 +77,12 @@
         st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)SecKeyA, uid);
         if (st != MI_OK) {
             // The moi (chua nap) -> key mac dinh FF...
+            // Lan auth sai vua roi lam roi Crypto1 cua the,
+            // phai dua the ve ACTIVE lai truoc khi thu key mac dinh.
+            if (RC522_ReactivateCard(uid) != MI_OK) {
+                TM_MFRC522_Halt();
+                return MI_ERR;
+            }
             st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)DefaultKey, uid);
             if (st != MI_OK) {
                 TM_MFRC522_Halt();
@@ -72,7 +94,7 @@
         if (st != MI_OK) {
             TM_MFRC522_Halt();
             return st;
-        }
+        }   
 
         // Ghi sector trailer: KeyA rieng + access bits (transport FF 07 80 69) + KeyB rieng
         memcpy(&trailer[0], SecKeyA, 6);

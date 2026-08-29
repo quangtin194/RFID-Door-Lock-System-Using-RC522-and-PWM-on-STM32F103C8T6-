@@ -11,7 +11,7 @@ void TM_MFRC522_Init(void) {
 	TM_MFRC522_WriteRegister(MFRC522_REG_T_RELOAD_H, 0);
 	TM_MFRC522_WriteRegister(MFRC522_REG_RF_CFG, 0x70);   // Set the receiver gain to maximum
 	TM_MFRC522_WriteRegister(MFRC522_REG_TX_AUTO, 0x40); // Set the transmitter to automatically adjust the modulation
-	TM_MFRC522_WriteRegister(MFRC522_REG_MODE, 0x3D);   
+	TM_MFRC522_WriteRegister(MFRC522_REG_MODE, 0x25);   // Tat CRC phan cung (TxCRCEn/RxCRCEn) - dung CRC mem tranh noi CRC 2 lan
 	TM_MFRC522_AntennaOn();		//Open the antenna
 }
 
