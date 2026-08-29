@@ -346,32 +346,32 @@ UID_Status_t RC522_UID_DeleteAdminByIndex(uint8_t id) {
 
     return UID_EXIST;
 }
-    uint8_t RC522_GetCardCount(void) {
+
+uint8_t RC522_GetCardCount(void) {
         return CardCount;
-    }
+}
 
-    uint8_t RC522_GetAdminCount(void) {
+uint8_t RC522_GetAdminCount(void) {
         return AdminCount;
-    }
+}
 
-    // Copy 4 byte UID cua slot "index" vao uid_out. Tra ve 1 neu index hop le,
-    // 0 neu khong hop le (khong ghi vao uid_out trong truong hop nay).
-    uint8_t RC522_GetCardUID(uint8_t index, uint8_t *uid_out) {
+uint8_t RC522_GetCardUID(uint8_t index, uint8_t *uid_out) {
         if (index >= MAX_CARDS || uid_out == NULL) {
             return 0;
         }
         memcpy(uid_out, AuthorizedCards[index], 4);
         return 1;
-    }
+}
 
-    uint8_t RC522_GetAdminUID(uint8_t index, uint8_t *uid_out) {
+uint8_t RC522_GetAdminUID(uint8_t index, uint8_t *uid_out) {
         if (index >= MAX_ADMINS || uid_out == NULL) {
             return 0;
         }
         memcpy(uid_out, AdminUIDs[index], 4);
         return 1;
-    }
- void Print_Card_List_UART(void) {
+}
+
+void Print_Card_List_UART(void) {
         char buf[64];
         uint8_t uid[4];
         UART_PC_Print("--- Card List (press number, then * to delete) ---\r\n");
@@ -397,12 +397,9 @@ UID_Status_t RC522_UID_DeleteAdminByIndex(uint8_t id) {
             }
             UART_PC_Print(buf);
         }
-    }
+}
 
-    // In UID cua slot vua duoc chon ra UART/Hercules va nhac nguoi dung bam *
-    // de xac nhan. OLED KHONG doi noi dung o buoc nay (van giu "Del/in uart")
-    // - toan bo chi tiet chon/xac nhan hien thi qua man hinh log UART.
-    void Print_Selected_Slot_UART(void) {
+void Print_Selected_Slot_UART(void) {
         if (Selected_Slot == SLOT_NONE) return;
 
         uint8_t uid[4];
@@ -424,4 +421,4 @@ UID_Status_t RC522_UID_DeleteAdminByIndex(uint8_t id) {
                     type, Selected_Slot + 1, uid[0], uid[1], uid[2], uid[3]);
         }
         UART_PC_Print(buf);
-    }
+}
