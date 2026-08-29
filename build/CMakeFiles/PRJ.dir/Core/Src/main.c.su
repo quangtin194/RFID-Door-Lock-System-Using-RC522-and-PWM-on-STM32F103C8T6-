@@ -1,0 +1,8 @@
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:87:5:main	16	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:140:6:SystemClock_Config	72	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:180:13:MX_I2C1_Init	8	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:214:13:MX_SPI1_Init	8	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:252:13:MX_TIM2_Init	64	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:311:13:MX_USART1_UART_Init	8	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:344:13:MX_GPIO_Init	40	static
+C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/Core/Src/main.c:416:6:Error_Handler	4	static

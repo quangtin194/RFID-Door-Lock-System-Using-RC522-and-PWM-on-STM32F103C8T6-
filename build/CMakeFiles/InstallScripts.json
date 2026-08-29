@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/build/cmake_install.cmake",
+		"C:/Users/Admin/RFID-Door-Lock-System-Using-RC522-and-PWM-on-STM32F103C8T6-/build/cmake/stm32cubemx/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
