@@ -163,5 +163,12 @@ extern TM_MFRC522_Status_t TM_MFRC522_Request(uint8_t reqMode, uint8_t* TagType)
 extern TM_MFRC522_Status_t TM_MFRC522_ToCard(uint8_t command, uint8_t* sendData, uint8_t sendLen, uint8_t* backData, uint16_t* backLen);
 extern TM_MFRC522_Status_t TM_MFRC522_Anticoll(uint8_t* serNum);
 
+uint16_t TM_MFRC522_CalcCRC(uint8_t *data, uint8_t len);
+TM_MFRC522_Status_t TM_MFRC522_SelectTag(uint8_t *serNum);
+TM_MFRC522_Status_t TM_MFRC522_Auth(uint8_t authMode, uint8_t blockAddr, uint8_t *key, uint8_t *uid);
+TM_MFRC522_Status_t TM_MFRC522_Read(uint8_t blockAddr, uint8_t *recvData);
+TM_MFRC522_Status_t TM_MFRC522_Write(uint8_t blockAddr, uint8_t *writeData);
+TM_MFRC522_Status_t TM_MFRC522_Halt(void);
+
 #endif
 

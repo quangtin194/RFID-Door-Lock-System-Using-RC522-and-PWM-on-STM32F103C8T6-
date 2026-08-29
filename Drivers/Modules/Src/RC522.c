@@ -1,32 +1,39 @@
 // INCLUDE & DEFINE
 #include "RC522.h"
+#include "UART.h"      
+#include <stdio.h>    
+#include <string.h>  
 
-#define PICC_REQIDL    0x26   //  Cmd yeu cau the phan hoi 
+#define PICC_REQIDL    0x26
 #define FLASH_USER_START_ADDR   0x0800FC00
 #define MAX_CARDS 5
 #define MAX_ADMINS 3
-#define FLASH_XOR_KEY 0x3C5A96F1
+#define FLASH_XOR_KEY 0x3C5A96F1 
 
 // VARIABLE DEFINITIONS
 static SPI_HandleTypeDef *RC522_Handle;
-uint8_t CurrentUID[5];                             // Present UID
-uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};    // Admin Card UID
-uint8_t AuthorizedCards[MAX_CARDS][4] = {0};       // Array to store authorized user
+uint8_t CurrentUID[5]; // Present UID
+uint8_t AdminUID[4] = {0x53, 0x4F, 0x42, 0x28};  // Admin Card UID
+uint8_t AuthorizedCards[MAX_CARDS][4] = {0}; // Array to store authorized user
 uint8_t CardCount = 0;
-uint8_t AdminUIDs[MAX_ADMINS][4]; 
+uint8_t AdminUIDs[MAX_ADMINS][4] = {0}; // Array to store additional admin UIDs
 uint8_t AdminCount = 0;
-
+//  card UIDs
+uint8_t Selected_Slot = SLOT_NONE;
 // FUNCTION DEFINITIONS
 void RC522_Init(SPI_HandleTypeDef *spi) {
     RC522_Handle = spi;
     TM_MFRC522_Init();
 }
 
-static uint8_t Is_Admin_Card(uint8_t *uid) {
+uint8_t Is_Admin_Card(uint8_t *uid) {
     if (memcmp(uid, AdminUID, 4) == 0) {
         return 1;
     }
-    for (int i = 0; i < AdminCount; i++) {
+    for (int i = 0; i < MAX_ADMINS; i++) {
+        if (AdminUIDs[i][0] == 0x00 && AdminUIDs[i][1] == 0x00 && AdminUIDs[i][2] == 0x00 && AdminUIDs[i][3] == 0x00) {
+            continue; 
+        }
         if (memcmp(uid, AdminUIDs[i], 4) == 0) {
             return 1;
         }
@@ -35,10 +42,11 @@ static uint8_t Is_Admin_Card(uint8_t *uid) {
 }
 
 void Flash_Save_Cards(void) {
-    __disable_irq();            
+    __disable_irq();           // turn off interrupts to prevent flash write issues
 
     HAL_FLASH_Unlock();
-    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPERR);
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_PGERR | FLASH_FLAG_WRPERR); // clear error flags before writing
+    // completion flag, write error, access error
 
     FLASH_EraseInitTypeDef EraseInitStruct;
     uint32_t PageError;
@@ -56,16 +64,15 @@ void Flash_Save_Cards(void) {
     HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, FLASH_USER_START_ADDR, counts);
 
     for (int i = 0; i < MAX_ADMINS; i++) {
-        uint32_t admin_word = 0xFFFFFFFF;
-        if (i < AdminCount) {
-            admin_word = (AdminUIDs[i][0] << 24) | (AdminUIDs[i][1] << 16) |
-                         (AdminUIDs[i][2] << 8)  | AdminUIDs[i][3];
-            admin_word ^= FLASH_XOR_KEY;
-        }
+        uint32_t admin_word = (AdminUIDs[i][0] << 24) |
+                              (AdminUIDs[i][1] << 16) |
+                              (AdminUIDs[i][2] << 8)  |
+                              AdminUIDs[i][3];
+        admin_word ^= FLASH_XOR_KEY;
         HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, FLASH_USER_START_ADDR + 4 + (i * 4), admin_word);
     }
 
-    for (int i = 0; i < CardCount; i++) {
+    for (int i = 0; i < MAX_CARDS; i++) {
         uint32_t uid_word = (AuthorizedCards[i][0] << 24) |
                             (AuthorizedCards[i][1] << 16) |
                             (AuthorizedCards[i][2] << 8)  |
@@ -82,6 +89,7 @@ void Flash_Save_Cards(void) {
     sprintf(dbg, "[SAVE] counts_raw=0x%08lX  readback=0x%08lX %s\r\n",
             counts, check_ptr[0],
             (check_ptr[0] == counts) ? "OK" : "MISMATCH!!");
+    UART_PC_Print(dbg);
 }
 
 void Flash_Load_Cards(void) {
@@ -105,7 +113,7 @@ void Flash_Load_Cards(void) {
     if (CardCount > MAX_CARDS) CardCount = 0;
     if (AdminCount > MAX_ADMINS) AdminCount = 0;
 
-    for (int i = 0; i < AdminCount; i++) {
+    for (int i = 0; i < MAX_ADMINS; i++) {
         uint32_t admin_word = flash_ptr[i + 1];
         
         admin_word ^= FLASH_XOR_KEY; 
@@ -116,7 +124,7 @@ void Flash_Load_Cards(void) {
         AdminUIDs[i][3] = admin_word & 0xFF;
     }
 
-    for (int i = 0; i < CardCount; i++) {
+    for (int i = 0; i < MAX_CARDS; i++) {
         uint32_t uid_word = flash_ptr[i + 4];
         
         uid_word ^= FLASH_XOR_KEY; 
@@ -154,42 +162,72 @@ void Flash_Print_Cards_UART(void) {
 }
 
 UID_Status_t RC522_UID_Add(void) {
-    if (CardCount >= MAX_CARDS) return UID_INVALID;
     if(Is_Admin_Card(CurrentUID)) {
         return UID_ADMIN; 
     }
 
-    for (int i = 0; i < CardCount; i++) {
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] == 0x00 && AuthorizedCards[i][1] == 0x00 && 
+            AuthorizedCards[i][2] == 0x00 && AuthorizedCards[i][3] == 0x00) continue;
+            
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
             return UID_EXIST; 
         }
     }
-
-    memcpy(AuthorizedCards[CardCount], CurrentUID, 4);
-    CardCount++;
-    Flash_Save_Cards();
-
-    return UID_NEW;
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] == 0x00 && AuthorizedCards[i][1] == 0x00 && AuthorizedCards[i][2] == 0x00 && AuthorizedCards[i][3] == 0x00) { 
+            memcpy(AuthorizedCards[i], CurrentUID, 4);
+            CardCount = 0;
+            for(int k = 0; k < MAX_CARDS; k++) {
+                if(AuthorizedCards[k][0] != 0x00) CardCount = k + 1;
+            }
+            Flash_Save_Cards();
+            return UID_NEW; 
+        }
+    }
+    return UID_INVALID;
 }
 
 UID_Status_t RC522_UID_Delete(void) {
-    if(Is_Admin_Card(CurrentUID)) {
-        return UID_ADMIN; // Admin card cannot be deleted
+    if (Is_Admin_Card(CurrentUID)) {
+        return UID_ADMIN; 
     }
-    for (int i = 0; i < CardCount; i++) {
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] == 0x00 && AuthorizedCards[i][1] == 0x00 && 
+            AuthorizedCards[i][2] == 0x00 && AuthorizedCards[i][3] == 0x00) {
+            continue; 
+        }
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
-            for (int j = i; j < CardCount - 1; j++) {
-                memcpy(AuthorizedCards[j], AuthorizedCards[j + 1], 4);
-            }
+            memset(AuthorizedCards[i], 0x00, 4); 
             
-            memset(AuthorizedCards[CardCount - 1], 0x00, 4); 
-            CardCount--;          
-            Flash_Save_Cards();   
+            CardCount = 0;
+            for(int k = 0; k < MAX_CARDS; k++) {
+                if(AuthorizedCards[k][0] != 0x00) CardCount = k + 1;
+            }      
+            Flash_Save_Cards();                 
             
             return UID_EXIST; 
         }
     }
-    return UID_NEW; // Card not found
+    
+    return UID_NEW; 
+}
+
+UID_Status_t RC522_UID_DeleteByIndex(uint8_t id) {
+    if (id >= MAX_CARDS) return UID_INVALID;
+
+    if (AuthorizedCards[id][0] == 0x00 && AuthorizedCards[id][1] == 0x00 && AuthorizedCards[id][2] == 0x00 && AuthorizedCards[id][3] == 0x00) {
+        return UID_NEW; 
+    }
+
+    memset(AuthorizedCards[id], 0x00, 4); 
+    CardCount = 0;
+    for(int k = 0; k < MAX_CARDS; k++) {
+        if(AuthorizedCards[k][0] != 0x00) CardCount = k + 1;
+    }      
+    Flash_Save_Cards();   
+            
+    return UID_EXIST; 
 }
 
 RC522_Status_t RC522_UID_Detected(void) {
@@ -229,47 +267,158 @@ UID_Status_t RC522_UID_AddAD(void) {
     if (memcmp(CurrentUID, AdminUID, 4) == 0) {
         return UID_ADMIN; 
     }
-    for (int i = 0; i < AdminCount; i++) {
+    for (int i = 0; i < MAX_ADMINS; i++) {
+        if (AdminUIDs[i][0] == 0x00 && AdminUIDs[i][1] == 0x00 && 
+            AdminUIDs[i][2] == 0x00 && AdminUIDs[i][3] == 0x00) {
+            continue; 
+        }
         if (memcmp(CurrentUID, AdminUIDs[i], 4) == 0) {
             return UID_EXIST; 
         }
     }
-    if (AdminCount >= MAX_ADMINS) {
-        return UID_INVALID; 
-    }
-    for (int i = 0; i < CardCount; i++) {
+    for(int i = 0; i < MAX_CARDS; i++) {
+        if (AuthorizedCards[i][0] == 0x00 && AuthorizedCards[i][1] == 0x00 && 
+            AuthorizedCards[i][2] == 0x00 && AuthorizedCards[i][3] == 0x00) {
+            continue;
+        }
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
-            for (int j = i; j < CardCount - 1; j++) {
-                memcpy(AuthorizedCards[j], AuthorizedCards[j + 1], 4);
+            memset(AuthorizedCards[i], 0x00, 4);
+            CardCount = 0;
+            for (int k = 0; k < MAX_CARDS; k++) {
+                if (AuthorizedCards[k][0] != 0x00) CardCount++; 
             }
-            memset(AuthorizedCards[CardCount - 1], 0x00, 4);
-            CardCount--;
-            
             break; 
         }
     }
-
-    memcpy(AdminUIDs[AdminCount], CurrentUID, 4);
-    AdminCount++;           
-    
-    Flash_Save_Cards(); 
-    return UID_NEW; 
+    for (int i = 0; i < MAX_ADMINS; i++) {
+        if (AdminUIDs[i][0] == 0x00 && AdminUIDs[i][1] == 0x00 && AdminUIDs[i][2] == 0x00 && AdminUIDs[i][3] == 0x00) {
+            memcpy(AdminUIDs[i], CurrentUID, 4);
+            AdminCount = 0;
+            for (int k = 0; k < MAX_ADMINS; k++) {
+                if (AdminUIDs[k][0] != 0x00) AdminCount = k + 1;
+            }        
+            Flash_Save_Cards(); 
+            return UID_NEW; 
+        }
+    }
+    return UID_INVALID;
 }
 
 UID_Status_t RC522_UID_DelAD(void) {
     if (memcmp(CurrentUID, AdminUID, 4) == 0) {
         return UID_ADMIN;
     }
-    for (int i = 0; i < AdminCount; i++) {
+
+    for (int i = 0; i < MAX_ADMINS; i++) {
+        if (AdminUIDs[i][0] == 0x00 && AdminUIDs[i][1] == 0x00 && 
+            AdminUIDs[i][2] == 0x00 && AdminUIDs[i][3] == 0x00) {
+            continue; 
+        }
+
         if (memcmp(CurrentUID, AdminUIDs[i], 4) == 0) {
-            for (int j = i; j < AdminCount - 1; j++) {
-                memcpy(AdminUIDs[j], AdminUIDs[j + 1], 4);
+            memset(AdminUIDs[i], 0x00, 4); 
+            
+            AdminCount = 0;
+            for (int k = 0; k < MAX_ADMINS; k++) {
+                if (AdminUIDs[k][0] != 0x00) AdminCount = k + 1;
             }
-            memset(AdminUIDs[AdminCount - 1], 0x00, 4);
-            AdminCount--;
             Flash_Save_Cards();
-            return UID_EXIST;
+            
+            return UID_EXIST; 
         }
     }
-    return UID_NEW;
+    return UID_NEW; 
+}
+
+UID_Status_t RC522_UID_DeleteAdminByIndex(uint8_t id) {
+    if (id >= MAX_ADMINS) return UID_INVALID;
+
+    if (AdminUIDs[id][0] == 0x00 && AdminUIDs[id][1] == 0x00 && AdminUIDs[id][2] == 0x00 && AdminUIDs[id][3] == 0x00) {
+        return UID_NEW; 
+    }
+
+    memset(AdminUIDs[id], 0x00, 4);
+    AdminCount = 0;
+    for (int k = 0; k < MAX_ADMINS; k++) {
+        if (AdminUIDs[k][0] != 0x00) AdminCount = k + 1;
+    }
+    Flash_Save_Cards();
+
+    return UID_EXIST;
+}
+
+uint8_t RC522_GetCardCount(void) {
+        return CardCount;
+}
+
+uint8_t RC522_GetAdminCount(void) {
+        return AdminCount;
+}
+
+uint8_t RC522_GetCardUID(uint8_t index, uint8_t *uid_out) {
+        if (index >= MAX_CARDS || uid_out == NULL) {
+            return 0;
+        }
+        memcpy(uid_out, AuthorizedCards[index], 4);
+        return 1;
+}
+
+uint8_t RC522_GetAdminUID(uint8_t index, uint8_t *uid_out) {
+        if (index >= MAX_ADMINS || uid_out == NULL) {
+            return 0;
+        }
+        memcpy(uid_out, AdminUIDs[index], 4);
+        return 1;
+}
+
+void Print_Card_List_UART(void) {
+        char buf[64];
+        uint8_t uid[4];
+        UART_PC_Print("--- Card List (press number, then * to delete) ---\r\n");
+
+        for (uint8_t i = 0; i < MAX_CARDS; i++) {
+            RC522_GetCardUID(i, uid);
+            if (uid[0] == 0x00 && uid[1] == 0x00 && uid[2] == 0x00 && uid[3] == 0x00) {
+                sprintf(buf, "%d) Card: (empty)\r\n", i + 1);
+            } else {
+                sprintf(buf, "%d) Card: %02X %02X %02X %02X\r\n", i + 1,
+                        uid[0], uid[1], uid[2], uid[3]);
+            }
+            UART_PC_Print(buf);
+        }
+
+        for (uint8_t i = 0; i < MAX_ADMINS; i++) {
+            RC522_GetAdminUID(i, uid);
+            if (uid[0] == 0x00 && uid[1] == 0x00 && uid[2] == 0x00 && uid[3] == 0x00) {
+                sprintf(buf, "%d) Admin: (empty)\r\n", MAX_CARDS + i + 1);
+            } else {
+                sprintf(buf, "%d) Admin: %02X %02X %02X %02X\r\n", MAX_CARDS + i + 1,
+                        uid[0], uid[1], uid[2], uid[3]);
+            }
+            UART_PC_Print(buf);
+        }
+}
+
+void Print_Selected_Slot_UART(void) {
+        if (Selected_Slot == SLOT_NONE) return;
+
+        uint8_t uid[4];
+        char buf[64];
+        const char *type;
+
+        if (Selected_Slot < MAX_CARDS) {
+            RC522_GetCardUID(Selected_Slot, uid);
+            type = "Card";
+        } else {
+            RC522_GetAdminUID(Selected_Slot - MAX_CARDS, uid);
+            type = "Admin";
+        }
+
+        if (uid[0] == 0x00 && uid[1] == 0x00 && uid[2] == 0x00 && uid[3] == 0x00) {
+            sprintf(buf, "Selected %s %d: (empty) - press * to confirm\r\n", type, Selected_Slot + 1);
+        } else {
+            sprintf(buf, "Selected %s %d: %02X %02X %02X %02X - press * to confirm\r\n",
+                    type, Selected_Slot + 1, uid[0], uid[1], uid[2], uid[3]);
+        }
+        UART_PC_Print(buf);
 }

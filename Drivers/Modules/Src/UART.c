@@ -22,14 +22,11 @@ void UART_Print_UID(void) {
         return;
     }
 
-    uint8_t status = TM_MFRC522_Anticoll(CurrentUID);
+    // In UID da doc san (khong goi lai Anticoll vi the co the dang o HALT)
+    char logStr[120];
+    snprintf(logStr, sizeof(logStr), "\r\n %02X %02X %02X %02X\r\n", 
+             CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
 
-    if (status == MI_OK) { 
-        char logStr[120];
-        snprintf(logStr, sizeof(logStr), "\r\n %02X %02X %02X %02X\r\n", 
-                 CurrentUID[0], CurrentUID[1], CurrentUID[2], CurrentUID[3]);
-    
-        UART_PC_Print(logStr);
-    }
+    UART_PC_Print(logStr);
 }
 

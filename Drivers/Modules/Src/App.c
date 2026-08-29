@@ -1,5 +1,6 @@
 // INCLUDE & DEFINE
 #include "App.h"
+#include "Keypad.h"
 
 // VARIABLE DEFINITIONS
 static volatile AppState_t appState;
@@ -37,7 +38,7 @@ void App_Init(Keypad_t *keypad, Buzzer_t *buzzer, UART_HandleTypeDef *uart,
   Buzzer_Init(buzzer);
   Keypad_Init(keypad);
   Flash_Print_Cards_UART();
-
+  Print_Card_List_UART();
   appState = IDLE;
   previous_State = ERROR_STATE;
 
@@ -45,7 +46,7 @@ void App_Init(Keypad_t *keypad, Buzzer_t *buzzer, UART_HandleTypeDef *uart,
 }
 
 void App_Run(void) {
-
+  
   if (appState != previous_State) {
     previous_State = appState;
     switch (appState) {
@@ -69,7 +70,7 @@ void App_Run(void) {
     case ADMIN_MODE:
       Keypad_EnableEXTI();
       Servo_SetAngle(OPEN_ANGLE);
-      Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
+      Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL #:EXIT", 1);
       UART_PC_Print("Admin mode\n");
       break;
 
@@ -116,7 +117,40 @@ void App_Run(void) {
       Oled_ShowLines("Scan", 2, "to delete!", 2);
       UART_PC_Print("Delete card\n");
       break;
+    
+    case ADD_MENU:
+      Keypad_EnableEXTI();
+      Oled_ShowLines("Add", 2, "1:Card 2:Admin", 1);
+      UART_PC_Print("Add menu: 1=AC (user card) 2=AA (admin card), # to return\n");
+      break;
 
+    case DELETE_MENU:
+      Keypad_EnableEXTI();
+      Oled_ShowLines("Delete", 2, "1:Card 2:Admin 3:List", 1);
+      UART_PC_Print("Delete menu: 1=DC (scan card) 2=DA (scan admin) 3=DU (list), # to return\n");
+      break;
+    
+    case DELETE_UID_LIST:
+      Keypad_EnableEXTI();
+      Selected_Slot = SLOT_NONE;
+      Oled_ShowLines("Del", 2, "in uart", 2);
+      UART_PC_Print("DU - Delete UID from list, no card required:\n");
+      Print_Card_List_UART();
+      break;
+
+    case UID_SLOT_DELETED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Slot", 2, "Cleared!", 2);
+      UART_PC_Print("Deleted UID at selected slot \n");
+      Flash_Print_Cards_UART();
+      break;
+    
+    case UID_SLOT_EMPTY:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Slot", 2, "None!", 2);
+      UART_PC_Print("Selected slot is empty! \n");
+      break;
+    
     case ADD_ADMIN_CARD:
       Keypad_DisableEXTI();
       Oled_ShowLines("Scan to", 2, "add Admin!", 2);
@@ -191,6 +225,7 @@ void App_Run(void) {
       break;
     }
   }
+
   //_____________________________________________
   if (keypad_event) {
     keypad_event = 0;
@@ -204,7 +239,7 @@ void App_Run(void) {
       appState = VERIFY_UID;
     else if (rc522Status == RC522_ERROR)
       appState = ERROR_STATE;
-    else if (key == KEY_THANG)
+    else if (key == KEY_SAO)
       appState = PASSWORD_INPUT;
     break;
 
@@ -238,10 +273,10 @@ void App_Run(void) {
     if (key >= KEY_0 && key <= KEY_9) {
       Keypad_Password_Append(key);
       Oled_ShowPasswordMask(Keypad_Password_GetLength());
-    } else if (key == KEY_SAO) {
+    } else if (key == KEY_THANG) {
       Keypad_Password_Del();
       Oled_ShowPasswordMask(Keypad_Password_GetLength());
-    } else if (key == KEY_THANG) {
+    } else if (key == KEY_SAO) {
       if (Keypad_Password_Verify()) {
         Lock_Level = 0;
         appState = ACCESS_ALLOWED;
@@ -255,21 +290,90 @@ void App_Run(void) {
     break;
 
   case ADMIN_MODE:
-    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
+    else if (key == KEY_1) 
+    {
+      appState = ADD_MENU;
+      Timeout_counter = HAL_GetTick();
+    }
+    else if (key == KEY_2) 
+    {
+      appState = DELETE_MENU;
+      Timeout_counter = HAL_GetTick();
+    }
+    else if (key == KEY_THANG) 
+    {
       appState = IDLE;
-    if (key == KEY_1) {
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+  
+  case ADD_MENU:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
+    else if (key == KEY_1) 
+    {
       appState = ADD_CARD;
       Timeout_counter = HAL_GetTick();
-    } else if (key == KEY_2) {
-      appState = DELETE_CARD;
-      Timeout_counter = HAL_GetTick();
-    } else if (key == KEY_3) {
+    }
+    else if (key == KEY_2) 
+    {
       appState = ADD_ADMIN_CARD;
       Timeout_counter = HAL_GetTick();
-    } else if (key == KEY_4) {
+    }
+    else if (key == KEY_THANG) 
+    {
+      appState = ADMIN_MODE;
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+  
+  case DELETE_MENU:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
+    else if (key == KEY_1) 
+    {
+      appState = DELETE_CARD;
+      Timeout_counter = HAL_GetTick();
+    }
+    else if (key == KEY_2) 
+    {
       appState = DEL_ADMIN_CARD;
       Timeout_counter = HAL_GetTick();
     }
+    else if (key == KEY_3) 
+    {
+      appState = DELETE_UID_LIST;
+      Timeout_counter = HAL_GetTick();
+    }
+    else if (key == KEY_THANG) 
+    {
+      appState = ADMIN_MODE;
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+  
+  case DELETE_UID_LIST:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT) appState = IDLE;
+    else if (key >= KEY_1 && key < KEY_1 + (MAX_CARDS + MAX_ADMINS)) 
+    {
+      Selected_Slot = (uint8_t)(key - KEY_1);
+      Print_Selected_Slot_UART();
+      Timeout_counter = HAL_GetTick();
+    } 
+    else if (key == KEY_SAO) 
+    {
+      // Bam * de xac nhan xoa UID tai slot da chon
+      if (Selected_Slot != SLOT_NONE) 
+      {
+        if (Selected_Slot < MAX_CARDS)
+          uidStatus = RC522_UID_DeleteByIndex(Selected_Slot);
+        else
+          uidStatus = RC522_UID_DeleteAdminByIndex(Selected_Slot - MAX_CARDS);
+
+        if (uidStatus == UID_EXIST) appState = UID_SLOT_DELETED;
+        else appState = UID_SLOT_EMPTY;
+      }
+      Timeout_counter = HAL_GetTick();
+    }     
     break;
 
   case LOCKED: 
@@ -291,12 +395,12 @@ void App_Run(void) {
       appState = IDLE;
     else {
       rc522Status = RC522_UID_Detected();
-      if (rc522Status == RC522_OK) {
+      if (rc522Status == RC522_OK) 
+      {
         uidStatus = RC522_UID_Add();
-        if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN)
-          appState = CARD_EXISTS;
-        else
-          appState = CARD_ADDED;
+        if (uidStatus == UID_NEW) appState = CARD_ADDED;
+        else appState = CARD_EXISTS;
+
       } else if (rc522Status == RC522_ERROR)
         appState = ERROR_STATE;
     }
@@ -317,18 +421,18 @@ void App_Run(void) {
         appState = ERROR_STATE;
     }
     break;
+  
 
   case ADD_ADMIN_CARD:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
       appState = IDLE;
     else {
       rc522Status = RC522_UID_Detected();
-      if (rc522Status == RC522_OK) {
+      if (rc522Status == RC522_OK) 
+      {
         uidStatus = RC522_UID_AddAD();
-        if (uidStatus == UID_NEW)
-          appState = ADMIN_ADDED;
-        else
-          appState = ADMIN_CHANGE_DENIED;
+        if (uidStatus == UID_NEW) appState = ADMIN_ADDED;
+        else appState = ADMIN_CHANGE_DENIED;
       } else if (rc522Status == RC522_ERROR)
         appState = ERROR_STATE;
     }
@@ -359,6 +463,8 @@ void App_Run(void) {
   case ADMIN_ADDED:
   case ADMIN_DELETED:
   case ADMIN_CHANGE_DENIED:
+  case UID_SLOT_DELETED:
+  case UID_SLOT_EMPTY:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
       appState = IDLE;
     break;

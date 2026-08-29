@@ -35,6 +35,12 @@ typedef enum {
     DELETE_DENIED,
     ERROR_STATE,
 
+    ADD_MENU,          
+    DELETE_MENU,       
+    DELETE_UID_LIST,   
+    UID_SLOT_DELETED,  
+    UID_SLOT_EMPTY,    
+
     PASSWORD_INPUT,
     ADD_ADMIN_CARD,
     DEL_ADMIN_CARD,

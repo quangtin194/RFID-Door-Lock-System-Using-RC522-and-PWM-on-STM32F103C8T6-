@@ -48,7 +48,7 @@ Key_t Keypad_Scan(void) {
       {KEY_1, KEY_2, KEY_3},
       {KEY_4, KEY_5, KEY_6},
       {KEY_7, KEY_8, KEY_9},
-      {KEY_THANG, KEY_0, KEY_SAO},
+      {KEY_SAO, KEY_0, KEY_THANG},
   };
   Keypad_DisableEXTI();
   for (uint8_t r = 0; r < KEYPAD_ROWS; r++) {
