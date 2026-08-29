@@ -47,6 +47,9 @@ typedef enum {
     ADMIN_ADDED,
     ADMIN_DELETED,
     ADMIN_CHANGE_DENIED,
+
+    SEC_CODE_FAIL,     // Khong ghi duoc ma bao mat vao the khi them the
+
     LOCKED
 
 } AppState_t;

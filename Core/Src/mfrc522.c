@@ -200,5 +200,133 @@ TM_MFRC522_Status_t TM_MFRC522_Anticoll(uint8_t* serNum) {
 		}
 	}
 	return status;
+}
+
+/* ISO14443A CRC_A (poly 0x1021, init 0x6363, reflected 0x8408) */
+uint16_t TM_MFRC522_CalcCRC(uint8_t *data, uint8_t len) {
+	uint16_t crc = 0x6363;
+	uint8_t i, bit;
+	for (i = 0; i < len; i++) {
+		crc ^= data[i];
+		for (bit = 0; bit < 8; bit++) {
+			if (crc & 0x0001) {
+				crc = (crc >> 1) ^ 0x8408;
+			} else {
+				crc >>= 1;
+			}
+		}
+	}
+	return crc;
+}
+
+/* Chon the (SELECT) bang UID da nhan tu Anticoll */
+TM_MFRC522_Status_t TM_MFRC522_SelectTag(uint8_t *serNum) {
+	uint8_t buf[9];
+	uint8_t i;
+	uint8_t bcc = 0;
+	uint16_t unLen;
+	uint16_t crc;
+
+	buf[0] = PICC_SElECTTAG; /* 0x93 */
+	buf[1] = 0x70;           /* 7 bytes: SEL + NVB + UID(4) + BCC */
+	for (i = 0; i < 4; i++) {
+		buf[2 + i] = serNum[i];
+		bcc ^= serNum[i];
+	}
+	buf[6] = bcc;
+	crc = TM_MFRC522_CalcCRC(buf, 7);
+	buf[7] = crc & 0xFF;
+	buf[8] = crc >> 8;
+
+	return TM_MFRC522_ToCard(PCD_TRANSCEIVE, buf, 9, buf, &unLen);
+}
+
+/* Xac thuc sector (PCD_AUTHENT), khong dung CRC */
+TM_MFRC522_Status_t TM_MFRC522_Auth(uint8_t authMode, uint8_t blockAddr, uint8_t *key, uint8_t *uid) {
+	uint8_t sendData[12];
+	uint8_t i;
+	uint16_t backLen;
+
+	sendData[0] = authMode;
+	sendData[1] = blockAddr;
+	for (i = 0; i < 6; i++) {
+		sendData[2 + i] = key[i];
+	}
+	for (i = 0; i < 4; i++) {
+		sendData[8 + i] = uid[i];
+	}
+
+	return TM_MFRC522_ToCard(PCD_AUTHENT, sendData, 12, sendData, &backLen);
+}
+
+/* Doc 16 byte du lieu cua mot block */
+TM_MFRC522_Status_t TM_MFRC522_Read(uint8_t blockAddr, uint8_t *recvData) {
+	uint8_t buf[4];
+	uint16_t unLen;
+	uint16_t crc;
+
+	buf[0] = PICC_READ; /* 0x30 */
+	buf[1] = blockAddr;
+	crc = TM_MFRC522_CalcCRC(buf, 2);
+	buf[2] = crc & 0xFF;
+	buf[3] = crc >> 8;
+
+	return TM_MFRC522_ToCard(PCD_TRANSCEIVE, buf, 4, recvData, &unLen);
+}
+
+/* Ghi 16 byte du lieu vao mot block */
+TM_MFRC522_Status_t TM_MFRC522_Write(uint8_t blockAddr, uint8_t *writeData) {
+	uint8_t buf[18];
+	uint8_t i;
+	uint16_t unLen;
+	uint16_t crc;
+	TM_MFRC522_Status_t status;
+
+	/* Gui lenh WRITE + dia chi block + CRC */
+	buf[0] = PICC_WRITE; /* 0xA0 */
+	buf[1] = blockAddr;
+	crc = TM_MFRC522_CalcCRC(buf, 2);
+	buf[2] = crc & 0xFF;
+	buf[3] = crc >> 8;
+	status = TM_MFRC522_ToCard(PCD_TRANSCEIVE, buf, 4, buf, &unLen);
+	if (status != MI_OK) {
+		return status;
+	}
+	/* The phai tra ve ACK 4 bit = 0x0A */
+	if (unLen != 4 || (buf[0] & 0x0F) != 0x0A) {
+		return MI_ERR;
+	}
+
+	/* Gui 16 byte du lieu + CRC */
+	for (i = 0; i < 16; i++) {
+		buf[i] = writeData[i];
+	}
+	crc = TM_MFRC522_CalcCRC(writeData, 16);
+	buf[16] = crc & 0xFF;
+	buf[17] = crc >> 8;
+	status = TM_MFRC522_ToCard(PCD_TRANSCEIVE, buf, 18, buf, &unLen);
+	if (status != MI_OK) {
+		return status;
+	}
+	if (unLen != 4 || (buf[0] & 0x0F) != 0x0A) {
+		return MI_ERR;
+	}
+
+	return MI_OK;
+}
+
+/* Dua the ve trang thai HALT */
+TM_MFRC522_Status_t TM_MFRC522_Halt(void) {
+	uint8_t buf[4];
+	uint16_t unLen;
+	uint16_t crc;
+
+	buf[0] = PICC_HALT; /* 0x50 */
+	buf[1] = 0x00;
+	crc = TM_MFRC522_CalcCRC(buf, 2);
+	buf[2] = crc & 0xFF;
+	buf[3] = crc >> 8;
+
+	return TM_MFRC522_ToCard(PCD_TRANSCEIVE, buf, 4, buf, &unLen);
 } 
 

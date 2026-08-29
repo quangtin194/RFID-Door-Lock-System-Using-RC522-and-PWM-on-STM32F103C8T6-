@@ -5,6 +5,18 @@
 #define FLASH_USER_START_ADDR   0x0800FC00
 #define FLASH_XOR_KEY 0x3C5A96F1
 
+// ---- Bao mat chong copy thong thuong (MIFARE Classic) ----
+// Ma bao mat 16 byte luu o sector 1 (block 4), bao ve bang key rieng.
+#define SEC_SECTOR        1
+#define SEC_BLOCK         (SEC_SECTOR * 4)      // block 4 (data dau cua sector)
+#define SEC_TRAILER       (SEC_SECTOR * 4 + 3)  // block 7 (Key A/B + access bits)
+#define SEC_KEY_SIZE      6
+
+static const uint8_t SecKeyA[SEC_KEY_SIZE] = {0xA0, 0xB1, 0xC2, 0xD3, 0xE4, 0xF5};
+static const uint8_t SecKeyB[SEC_KEY_SIZE] = {0xF5, 0xE4, 0xD3, 0xC2, 0xB1, 0xA0};
+static const uint8_t SecCode[16] = {'F','4','B','K','-','M','E','S','S','I','S','I','U','U','!','!'};
+static const uint8_t DefaultKey[SEC_KEY_SIZE] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
 // Slot dang duoc chon trong danh sach xoa qua UART (0..MAX_CARDS-1 la Card,
 // MAX_CARDS..MAX_CARDS+MAX_ADMINS-1 la Admin). Khai bao extern trong RC522.h.
 uint8_t Selected_Slot = SLOT_NONE;
@@ -34,6 +46,69 @@ static uint8_t Is_Admin_Card(uint8_t *uid) {
         }
     }
     return 0; 
+}
+
+// Ghi ma bao mat va key rieng vao the (goi khi them the AC/AA).
+// Ho tro ca the moi (key mac dinh) va the da nap ma (key rieng).
+static TM_MFRC522_Status_t RC522_WriteSecCode(uint8_t *uid) {
+    uint8_t trailer[16];
+    TM_MFRC522_Status_t st;
+
+    st = TM_MFRC522_SelectTag(uid);
+    if (st != MI_OK) return st;
+
+    // The da duoc nap ma truoc do -> key rieng
+    st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)SecKeyA, uid);
+    if (st != MI_OK) {
+        // The moi (chua nap) -> key mac dinh FF...
+        st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)DefaultKey, uid);
+        if (st != MI_OK) {
+            TM_MFRC522_Halt();
+            return st;
+        }
+    }
+
+    st = TM_MFRC522_Write(SEC_BLOCK, (uint8_t *)SecCode);
+    if (st != MI_OK) {
+        TM_MFRC522_Halt();
+        return st;
+    }
+
+    // Ghi sector trailer: KeyA rieng + access bits (transport FF 07 80 69) + KeyB rieng
+    memcpy(&trailer[0], SecKeyA, 6);
+    trailer[6] = 0xFF;
+    trailer[7] = 0x07;
+    trailer[8] = 0x80;
+    trailer[9] = 0x69;
+    memcpy(&trailer[10], SecKeyB, 6);
+    st = TM_MFRC522_Write(SEC_TRAILER, trailer);
+
+    TM_MFRC522_Halt();
+    return st;
+}
+
+// Doc ma bao mat tu the va so sanh. Tra ve MI_OK neu dung, MI_ERR neu sai.
+static TM_MFRC522_Status_t RC522_VerifySecCode(uint8_t *uid) {
+    uint8_t buf[16];
+    TM_MFRC522_Status_t st;
+
+    st = TM_MFRC522_SelectTag(uid);
+    if (st != MI_OK) return st;
+
+    st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)SecKeyA, uid);
+    if (st != MI_OK) {
+        TM_MFRC522_Halt();
+        return st;
+    }
+
+    st = TM_MFRC522_Read(SEC_BLOCK, buf);
+    TM_MFRC522_Halt();
+    if (st != MI_OK) return st;
+
+    if (memcmp(buf, SecCode, 16) != 0) {
+        return MI_ERR;
+    }
+    return MI_OK;
 }
 
 void Flash_Save_Cards(void) {
@@ -167,6 +242,11 @@ UID_Status_t RC522_UID_Add(void) {
         }
     }
 
+    // Ghi ma bao mat vao the truoc khi luu vao danh sach
+    if (RC522_WriteSecCode(CurrentUID) != MI_OK) {
+        return UID_INVALID; // the khong ghi duoc ma bao mat
+    }
+
     memcpy(AuthorizedCards[CardCount], CurrentUID, 4);
     CardCount++;
     Flash_Save_Cards();
@@ -214,17 +294,35 @@ RC522_Status_t RC522_UID_Detected(void) {
 }
 
 UID_Status_t RC522_UID_Verify(void) {
-    if (Is_Admin_Card(CurrentUID)) {
-        return UID_ADMIN;
-    }
-    for (int i = 0; i < MAX_CARDS; i++) {
-        if (AuthorizedCards[i][0] != 0x00) { 
-            if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
-                return UID_VALID; 
+    uint8_t is_master = (memcmp(CurrentUID, AdminUID, 4) == 0);
+    uint8_t is_admin = Is_Admin_Card(CurrentUID);
+    uint8_t is_valid = 0;
+
+    if (!is_admin) {
+        for (int i = 0; i < MAX_CARDS; i++) {
+            if (AuthorizedCards[i][0] != 0x00) {
+                if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
+                    is_valid = 1;
+                    break;
+                }
             }
         }
     }
-    return UID_INVALID;
+
+    if (!is_admin && !is_valid) {
+        return UID_INVALID;
+    }
+
+    // Kiem tra ma bao mat luu tren the.
+    // The admin goc (master) duoc mien de tranh bi khoa ngoai;
+    // cac the thuong va admin them vao deu phai co ma dung.
+    if (!is_master) {
+        if (RC522_VerifySecCode(CurrentUID) != MI_OK) {
+            return UID_INVALID; // dung UID nhung sai/khong co ma -> khong hop le
+        }
+    }
+
+    return is_admin ? UID_ADMIN : UID_VALID;
 }
 
 UID_Status_t RC522_UID_AddAD(void) {
@@ -239,6 +337,12 @@ UID_Status_t RC522_UID_AddAD(void) {
     if (AdminCount >= MAX_ADMINS) {
         return UID_INVALID; 
     }
+
+    // Ghi ma bao mat vao the truoc khi luu
+    if (RC522_WriteSecCode(CurrentUID) != MI_OK) {
+        return UID_INVALID; // the khong ghi duoc ma bao mat
+    }
+
     for (int i = 0; i < CardCount; i++) {
         if (memcmp(CurrentUID, AuthorizedCards[i], 4) == 0) {
             for (int j = i; j < CardCount - 1; j++) {

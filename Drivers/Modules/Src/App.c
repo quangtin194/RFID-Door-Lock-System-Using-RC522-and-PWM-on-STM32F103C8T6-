@@ -213,6 +213,12 @@ void App_Run(void) {
       UART_PC_Print("Cannot change admin card\n");
       break;
 
+    case SEC_CODE_FAIL:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Write Code", 2, "Failed!", 2);
+      UART_PC_Print("Khong ghi duoc ma bao mat vao the\n");
+      break;
+
     case ERROR_STATE:
       Keypad_DisableEXTI();
       Servo_SetAngle(CLOSE_ANGLE);
@@ -384,10 +390,12 @@ void App_Run(void) {
       rc522Status = RC522_UID_Detected();
       if (rc522Status == RC522_OK) {
         uidStatus = RC522_UID_Add();
-        if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN)
+        if (uidStatus == UID_NEW)
+          appState = CARD_ADDED;
+        else if (uidStatus == UID_EXIST || uidStatus == UID_ADMIN)
           appState = CARD_EXISTS;
         else
-          appState = CARD_ADDED;
+          appState = SEC_CODE_FAIL;
       } else if (rc522Status == RC522_ERROR)
         appState = ERROR_STATE;
     }
@@ -419,6 +427,8 @@ void App_Run(void) {
         uidStatus = RC522_UID_AddAD();
         if (uidStatus == UID_NEW)
           appState = ADMIN_ADDED;
+        else if (uidStatus == UID_INVALID)
+          appState = SEC_CODE_FAIL;
         else
           appState = ADMIN_CHANGE_DENIED;
       } else if (rc522Status == RC522_ERROR)
@@ -453,6 +463,7 @@ void App_Run(void) {
   case ADMIN_CHANGE_DENIED:
   case UID_SLOT_DELETED:
   case UID_SLOT_EMPTY:
+  case SEC_CODE_FAIL:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_S_WAIT)
       appState = IDLE;
     break;
