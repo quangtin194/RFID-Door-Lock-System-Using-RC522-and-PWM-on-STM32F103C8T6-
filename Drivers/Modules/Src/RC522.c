@@ -66,7 +66,7 @@
 
     // Ghi ma bao mat va key rieng vao the (goi khi them the AC/AA).
     // Ho tro ca the moi (key mac dinh) va the da nap ma (key rieng).
-    static TM_MFRC522_Status_t RC522_WriteSecCode(uint8_t uid) {
+    static TM_MFRC522_Status_t RC522_WriteSecCode(uint8_t *uid) {
     uint8_t trailer[16];
     TM_MFRC522_Status_t st;
 
@@ -107,7 +107,7 @@
 
 
     // Doc ma bao mat tu the va so sanh. Tra ve MI_OK neu dung, MI_ERR neu sai.
-    static TM_MFRC522_Status_t RC522_VerifySecCode(uint8_t uid) {
+    static TM_MFRC522_Status_t RC522_VerifySecCode(uint8_t *uid) {
     uint8_t buf[16];
     TM_MFRC522_Status_t st;
 
