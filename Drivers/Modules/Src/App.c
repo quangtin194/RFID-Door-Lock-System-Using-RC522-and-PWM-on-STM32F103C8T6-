@@ -37,7 +37,7 @@ void App_Init(Keypad_t *keypad, Buzzer_t *buzzer, UART_HandleTypeDef *uart,
   Buzzer_Init(buzzer);
   Keypad_Init(keypad);
   Flash_Print_Cards_UART();
-
+  Print_Card_List_UART();
   appState = IDLE;
   previous_State = ERROR_STATE;
 
@@ -69,8 +69,8 @@ void App_Run(void) {
     case ADMIN_MODE:
       Keypad_EnableEXTI();
       Servo_SetAngle(OPEN_ANGLE);
-      Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL 3:AA 4:DA", 1);
-      UART_PC_Print("Admin mode\n");
+      Oled_ShowLines("Hi Boss!", 2, "1:ADD 2:DEL", 1);
+      UART_PC_Print("Admin mode: 1=Add 2=Del (bam # de thoat)\n");
       break;
 
     case ACCESS_ALLOWED:
@@ -116,7 +116,40 @@ void App_Run(void) {
       Oled_ShowLines("Scan", 2, "to delete!", 2);
       UART_PC_Print("Delete card\n");
       break;
+    
+    case ADD_MENU:
+      Keypad_EnableEXTI();
+      Oled_ShowLines("Add", 2, "1:Card 2:Admin", 1);
+      UART_PC_Print("Add menu: 1=AC (the thuong) 2=AA (the admin), # de quay lai\n");
+      break;
 
+    case DELETE_MENU:
+      Keypad_EnableEXTI();
+      Oled_ShowLines("Delete", 2, "1:Card 2:Admin 3:List", 1);
+      UART_PC_Print("Delete menu: 1=DC (scan the) 2=DA (scan admin) 3=DU (danh sach), # de quay lai\n");
+      break;
+    
+    case DELETE_UID_LIST:
+      Keypad_EnableEXTI();
+      Selected_Slot = SLOT_NONE;
+      Oled_ShowLines("Del", 2, "in uart", 2);
+      UART_PC_Print("DU - Xoa UID theo danh sach, khong can the:\n");
+      Print_Card_List_UART();
+      break;
+
+    case UID_SLOT_DELETED:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Slot", 2, "Cleared!", 2);
+      UART_PC_Print("Da xoa UID tai slot da chon \n");
+      Flash_Print_Cards_UART();
+      break;
+    
+    case UID_SLOT_EMPTY:
+      Keypad_DisableEXTI();
+      Oled_ShowLines("Slot", 2, "None!", 2);
+      UART_PC_Print("Slot da chon, trong! \n");
+      break;
+    
     case ADD_ADMIN_CARD:
       Keypad_DisableEXTI();
       Oled_ShowLines("Scan to", 2, "add Admin!", 2);
@@ -257,17 +290,72 @@ void App_Run(void) {
   case ADMIN_MODE:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
       appState = IDLE;
-    if (key == KEY_1) {
+    else if (key == KEY_1) {  
+      appState = ADD_MENU;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_2) {
+      appState = DELETE_MENU;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_THANG) {
+      appState = IDLE;
+    }
+    break;
+  
+  case ADD_MENU:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else if (key == KEY_1) {
       appState = ADD_CARD;
       Timeout_counter = HAL_GetTick();
     } else if (key == KEY_2) {
-      appState = DELETE_CARD;
-      Timeout_counter = HAL_GetTick();
-    } else if (key == KEY_3) {
       appState = ADD_ADMIN_CARD;
       Timeout_counter = HAL_GetTick();
-    } else if (key == KEY_4) {
+    } else if (key == KEY_THANG) {
+      appState = ADMIN_MODE;
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+  
+  case DELETE_MENU:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else if (key == KEY_1) {
+      appState = DELETE_CARD;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_2) {
       appState = DEL_ADMIN_CARD;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_3) {
+      appState = DELETE_UID_LIST;
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_THANG) {
+      appState = ADMIN_MODE;
+      Timeout_counter = HAL_GetTick();
+    }
+    break;
+  
+  case DELETE_UID_LIST:
+    if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)
+      appState = IDLE;
+    else if (key >= KEY_1 && key < KEY_1 + (MAX_CARDS + MAX_ADMINS)) {
+      Selected_Slot = (uint8_t)(key - KEY_1);
+      Print_Selected_Slot_UART();
+      Timeout_counter = HAL_GetTick();
+    } else if (key == KEY_SAO) {
+      // Bam * de xac nhan xoa UID tai slot da chon
+      if (Selected_Slot != SLOT_NONE) {
+        if (Selected_Slot < MAX_CARDS)
+          uidStatus = RC522_UID_DeleteByIndex(Selected_Slot);
+        else
+          uidStatus = RC522_UID_DeleteAdminByIndex(Selected_Slot - MAX_CARDS);
+
+        if (uidStatus == UID_EXIST)
+          appState = UID_SLOT_DELETED;
+        else
+          appState = UID_SLOT_EMPTY;
+      }
+    } else if (key == KEY_THANG) {
+      appState = DELETE_MENU;
       Timeout_counter = HAL_GetTick();
     }
     break;
@@ -317,6 +405,7 @@ void App_Run(void) {
         appState = ERROR_STATE;
     }
     break;
+  
 
   case ADD_ADMIN_CARD:
     if (HAL_GetTick() - Timeout_counter > TIMEOUT_L_WAIT)

@@ -10,6 +10,14 @@
 #include <string.h>
 #include "UART.h"  
 
+// So slot trong danh sach xoa qua UART: Card (1..MAX_CARDS) + Admin (sau do)
+#define MAX_CARDS 5
+#define MAX_ADMINS 3
+#define SLOT_NONE 0xFF
+
+// Slot dang duoc chon de xoa qua UART (dung chung giua RC522.c va App.c)
+extern uint8_t Selected_Slot;
+
 // ENUM 
 typedef enum
 {
@@ -39,6 +47,14 @@ UID_Status_t RC522_UID_Add(void);      // Hàm này trả về UID_NEW, UID_ADMI
 UID_Status_t RC522_UID_AddAD(void);    
 UID_Status_t RC522_UID_DelAD(void);
 
+UID_Status_t RC522_UID_DeleteByIndex(uint8_t index);
+uint8_t RC522_GetCardCount(void);
+uint8_t RC522_GetCardUID(uint8_t index, uint8_t *uid_out);
+uint8_t RC522_GetAdminCount(void);
+uint8_t RC522_GetAdminUID(uint8_t index, uint8_t *uid_out);
+UID_Status_t RC522_UID_DeleteAdminByIndex(uint8_t index);
+void Print_Card_List_UART(void);
+void Print_Selected_Slot_UART(void);
 #endif
 
 
