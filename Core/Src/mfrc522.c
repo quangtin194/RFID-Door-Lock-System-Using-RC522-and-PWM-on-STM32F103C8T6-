@@ -246,6 +246,7 @@ TM_MFRC522_Status_t TM_MFRC522_Auth(uint8_t authMode, uint8_t blockAddr, uint8_t
 	uint8_t sendData[12];
 	uint8_t i;
 	uint16_t backLen;
+	TM_MFRC522_Status_t status;
 
 	sendData[0] = authMode;
 	sendData[1] = blockAddr;
@@ -256,7 +257,18 @@ TM_MFRC522_Status_t TM_MFRC522_Auth(uint8_t authMode, uint8_t blockAddr, uint8_t
 		sendData[8 + i] = uid[i];
 	}
 
-	return TM_MFRC522_ToCard(PCD_AUTHENT, sendData, 12, sendData, &backLen);
+	status = TM_MFRC522_ToCard(PCD_AUTHENT, sendData, 12, sendData, &backLen);
+	if (status != MI_OK) {
+		return status;
+	}
+
+	// Auth chi thanh cong khi Crypto1 duoc bat (MFCrypto1On = Status2Reg bit 2).
+	// Neu key sai, the gui NACK/khong phan hoi => MFRC522 tat Crypto1 => bit nay = 0.
+	// (ToCard cho PCD_AUTHENT khong tra ve loi khi key sai nen phai kiem tra bit nay.)
+	if (!(TM_MFRC522_ReadRegister(MFRC522_REG_STATUS2) & 0x04)) {
+		return MI_ERR;
+	}
+	return MI_OK;
 }
 
 /* Doc 16 byte du lieu cua mot block */
