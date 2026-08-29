@@ -66,72 +66,72 @@
 
     // Ghi ma bao mat va key rieng vao the (goi khi them the AC/AA).
     // Ho tro ca the moi (key mac dinh) va the da nap ma (key rieng).
-    static TM_MFRC522_Status_t RC522_WriteSecCode(uint8_t *uid) {
-        uint8_t trailer[16];
-        TM_MFRC522_Status_t st;
+    static TM_MFRC522_Status_t RC522_WriteSecCode(uint8_t uid) {
+    uint8_t trailer[16];
+    TM_MFRC522_Status_t st;
 
-        st = TM_MFRC522_SelectTag(uid);
-        if (st != MI_OK) return st;
+    st = TM_MFRC522_SelectTag(uid);
+    if (st != MI_OK) return st;
 
-        // The da duoc nap ma truoc do -> key rieng
-        st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)SecKeyA, uid);
-        if (st != MI_OK) {
-            // The moi (chua nap) -> key mac dinh FF...
-            // Lan auth sai vua roi lam roi Crypto1 cua the,
-            // phai dua the ve ACTIVE lai truoc khi thu key mac dinh.
-            if (RC522_ReactivateCard(uid) != MI_OK) {
-                TM_MFRC522_Halt();
-                return MI_ERR;
-            }
-            st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)DefaultKey, uid);
-            if (st != MI_OK) {
-                TM_MFRC522_Halt();
-                return st;
-            }
+    st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t)SecKeyA, uid);
+    if (st != MI_OK) {
+        if (RC522_ReactivateCard(uid) != MI_OK) {
+            TM_MFRC522_Halt();
+            TM_MFRC522_ClearBitMask(0x08, 0x08); // VÁ LỖI: Tắt Crypto1
+            return MI_ERR;
         }
-
-        st = TM_MFRC522_Write(SEC_BLOCK, (uint8_t *)SecCode);
+        st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t )DefaultKey, uid);
         if (st != MI_OK) {
             TM_MFRC522_Halt();
+            TM_MFRC522_ClearBitMask(0x08, 0x08); // VÁ LỖI: Tắt Crypto1
             return st;
-        }   
+        }
+    }
 
-        // Ghi sector trailer: KeyA rieng + access bits (transport FF 07 80 69) + KeyB rieng
-        memcpy(&trailer[0], SecKeyA, 6);
-        trailer[6] = 0xFF;
-        trailer[7] = 0x07;
-        trailer[8] = 0x80;
-        trailer[9] = 0x69;
-        memcpy(&trailer[10], SecKeyB, 6);
-        st = TM_MFRC522_Write(SEC_TRAILER, trailer);
-
+    st = TM_MFRC522_Write(SEC_BLOCK, (uint8_t)SecCode);
+    if (st != MI_OK) {
         TM_MFRC522_Halt();
+        TM_MFRC522_ClearBitMask(0x08, 0x08); // VÁ LỖI: Tắt Crypto1
         return st;
     }
 
+    memcpy(&trailer[0], SecKeyA, 6);
+    trailer[6] = 0xFF; trailer[7] = 0x07; trailer[8] = 0x80; trailer[9] = 0x69;
+    memcpy(&trailer[10], SecKeyB, 6);
+    st = TM_MFRC522_Write(SEC_TRAILER, trailer);
+
+    TM_MFRC522_Halt();
+    TM_MFRC522_ClearBitMask(0x08, 0x08); // VÁ LỖI: Tắt Crypto1
+    return st;
+}
+
+
     // Doc ma bao mat tu the va so sanh. Tra ve MI_OK neu dung, MI_ERR neu sai.
-    static TM_MFRC522_Status_t RC522_VerifySecCode(uint8_t *uid) {
-        uint8_t buf[16];
-        TM_MFRC522_Status_t st;
+    static TM_MFRC522_Status_t RC522_VerifySecCode(uint8_t uid) {
+    uint8_t buf[16];
+    TM_MFRC522_Status_t st;
 
-        st = TM_MFRC522_SelectTag(uid);
-        if (st != MI_OK) return st;
+    st = TM_MFRC522_SelectTag(uid);
+    if (st != MI_OK) return st;
 
-        st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t *)SecKeyA, uid);
-        if (st != MI_OK) {
-            TM_MFRC522_Halt();
-            return st;
-        }
-
-        st = TM_MFRC522_Read(SEC_BLOCK, buf);
+    st = TM_MFRC522_Auth(PICC_AUTHENT1A, SEC_BLOCK, (uint8_t)SecKeyA, uid);
+    if (st != MI_OK) {
         TM_MFRC522_Halt();
-        if (st != MI_OK) return st;
-
-        if (memcmp(buf, SecCode, 16) != 0) {
-            return MI_ERR;
-        }
-        return MI_OK;
+        TM_MFRC522_ClearBitMask(0x08, 0x08); // VÁ LỖI: Tắt Crypto1
+        return st;
     }
+
+    st = TM_MFRC522_Read(SEC_BLOCK, buf);
+    TM_MFRC522_Halt();
+    TM_MFRC522_ClearBitMask(0x08, 0x08); // VÁ LỖI: Tắt Crypto1
+
+    if (st != MI_OK) return st;
+
+    if (memcmp(buf, SecCode, 16) != 0) {
+        return MI_ERR;
+    }
+    return MI_OK;
+}
 
     void Flash_Save_Cards(void) {
         __disable_irq();            
