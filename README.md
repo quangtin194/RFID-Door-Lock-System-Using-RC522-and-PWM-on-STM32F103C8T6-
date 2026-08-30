@@ -43,7 +43,7 @@ The system authenticates users through **two methods**: tapping an RFID card (vi
 
 ## 4. Main Logic / FSM & Response Levels
 
-Full state diagram: [`F4BK_FSM.PNG`](https://drive.google.com/file/d/10JL-08u7MnHWL44crkxNQzrKQzFTBXPC/view?usp=sharing)
+Full state diagram: [`F4BK_FSM.PNG`](https://drive.google.com/file/d/12jqCF4o-pXp2Hkpcgn-176lHO_Ow_XUr/view?usp=sharing)
 
 **Three main authentication sources feeding into the FSM:**
 
