@@ -35,11 +35,11 @@ typedef enum {
     DELETE_DENIED,
     ERROR_STATE,
 
-    ADD_MENU,          // Menu con sau khi bam phim 1 (Them the) o Admin Mode
-    DELETE_MENU,       // Menu con sau khi bam phim 2 (Xoa the) o Admin Mode
-    DELETE_UID_LIST,   // Chon vi tri trong danh sach UID va xoa bang phim *
-    UID_SLOT_DELETED,  // Da xoa UID tai vi tri da chon (gan ve 0x00000000)
-    UID_SLOT_EMPTY,    // Vi tri da chon dang trong san, khong co gi de xoa
+    ADD_MENU,          
+    DELETE_MENU,       
+    DELETE_UID_LIST,   
+    UID_SLOT_DELETED,  
+    UID_SLOT_EMPTY,    
 
     PASSWORD_INPUT,
     ADD_ADMIN_CARD,
@@ -47,9 +47,6 @@ typedef enum {
     ADMIN_ADDED,
     ADMIN_DELETED,
     ADMIN_CHANGE_DENIED,
-
-    SEC_CODE_FAIL,     // Khong ghi duoc ma bao mat vao the khi them the
-
     LOCKED
 
 } AppState_t;
